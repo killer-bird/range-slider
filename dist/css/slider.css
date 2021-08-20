@@ -1,0 +1,29 @@
+/*!**************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/scss/index.scss ***!
+  \**************************************************************************************************************/
+body {
+  background: beige;
+}
+body .slide-container {
+  height: 15px;
+  width: 266px;
+  padding: 0 5px;
+}
+body .slide-container .range-slider {
+  height: 100%;
+  width: 100%;
+  background: darkgray;
+  border-radius: 5px;
+  position: relative;
+}
+body .slide-container .range-slider .range-slider-mark {
+  position: absolute;
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  background: red;
+  bottom: -4px;
+  cursor: pointer;
+}
+
+/*# sourceMappingURL=slider.css.map*/
