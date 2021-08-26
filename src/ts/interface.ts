@@ -1,4 +1,5 @@
 export function SliderController(model, view) {
+
     const thumb: HTMLElement = document.getElementsByClassName('range-slider-thumb')[0] as HTMLElement
     const rangeSlider: HTMLElement  = document.querySelector('.range-slider')
     const progressBar: HTMLElement = document.querySelector('.range-slider-progress')
@@ -6,16 +7,16 @@ export function SliderController(model, view) {
     const box = rangeSlider.getBoundingClientRect()
 
 
-    const progressInput:HTMLElement = document.querySelector('.colorBar')
-    const progressThumb:HTMLElement = document.querySelector('.colorThumb')
+    const progressInput = <HTMLInputElement>document.querySelector('.colorBar')
+    const progressThumb = <HTMLInputElement>document.querySelector('.colorThumb')
 
-    progressInput.addEventListener('change',()=>{
-        console.log(41212)
+    progressInput.addEventListener('input',()=>{
+        model.setColorBar(progressInput.value)
     })
-    progressThumb.addEventListener('change',()=>{
-        console.log(789090)
-        model.setColorThumb('#32a4a8')
-        console.log(model.getModel())
+    progressThumb.addEventListener('input',()=>{
+        model.setColorThumb(progressThumb.value)
+
+
     })
     thumb.onmousedown = function (event) {
         event.preventDefault();

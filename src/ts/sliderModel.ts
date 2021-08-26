@@ -1,5 +1,9 @@
+import {MakeObserverSubject} from "./sliderObserver";
+
 export class SliderModel {
-    constructor(private step?: number,
+
+    constructor(
+                private step?: number,
                 private vertical?: boolean,
                 private colorBar?: string,
                 private colorThumb?: string,
@@ -12,14 +16,20 @@ export class SliderModel {
         this.range = range || [1, 100]
     }
 
+    changed = MakeObserverSubject();
     setStep(step: number): void {
         this.step = step;
+        this.changed.notifyObservers(this.step)
     }
+
     setColorBar(color:string):void{
         this.colorBar = color;
+        this.changed.notifyObservers(color)
+        console.log(color)
     }
     setColorThumb(color:string):void{
         this.colorThumb = color;
+        this.changed.notifyObservers(color)
     }
 
     getModel() {
@@ -30,6 +40,5 @@ export class SliderModel {
             colorThumb: this.colorThumb,
             range: this.range
         }
-
     }
 }
