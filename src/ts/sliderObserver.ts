@@ -9,15 +9,13 @@ export function MakeObserverSubject() {
     let removeObserver = (o): void => {
         observers.splice(observers.indexOf(o), 1)
     }
-    let notifyObservers = (data)=>{
+    let notifyObservers = (func) => {
         let observerSnapshot = observers.slice(0)
-        for(let i in observerSnapshot){
-            console.log(observerSnapshot[i])
-            observerSnapshot[i].subscribe()
-
+        for (let i in observerSnapshot) {
+            observerSnapshot[i].subscribe(func)
         }
-        return data
     }
+
     return {
 
         addObserver: addObserver,
