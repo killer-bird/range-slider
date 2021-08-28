@@ -31,15 +31,26 @@ body{
     }
     .range-slider-scale {
       margin: 5px 0;
-      width: 100%;
+      width: 94%;
       height: 30px;
       display: flex;
-      .value{
-        width: 10%;
-        height: 100%;
-        text-align: center;
-
+      position: absolute;
+      left: 13px;
+      .range-slider-scale-item{
+        &_text{
+          height: 8px;
+          width: 1px;
+          background: black;
+          margin-right: 12px;
+        }
+        &_small{
+          width: 1px;
+          height: 4px;
+          background: black;
+          margin-right: 11px;
+        }
       }
+
 
     }
   }
