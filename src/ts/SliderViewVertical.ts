@@ -1,13 +1,12 @@
-export function SliderView(model, rootEl) {
+export function SliderViewVertical(model, rootEl) {
     model.changed.addObserver(this)
-
     let {min, max, step, position} = model.getModel()
-    this.slider = $('<div class="range-slider"><div/>').appendTo(rootEl)
-    this.thumb = $('<div class="range-slider-thumb"><div/>').appendTo(this.slider)
+    this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(rootEl)
+    this.thumb = $('<div class="range-slider-thumb_vertical"><div/>').appendTo(this.slider)
     this.thumb.css('color', "white")
     this.thumb.css('textAlign', 'center')
-    this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider)
-    this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider)
+    this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider)
+    this.scale = $('<div class="range-slider-scale_vertical"><div/>').appendTo(this.slider)
 
     for (let i = 0; i <= 20; i++) {
         if (i === 0 || i % 5 === 0) {

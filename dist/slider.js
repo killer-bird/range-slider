@@ -1,59 +1,415 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/ts/model.ts":
-/*!*************************!*\
-  !*** ./src/ts/model.ts ***!
-  \*************************/
+/***/ "./src/ts/SliderControllerVertical.ts":
+/*!********************************************!*\
+  !*** ./src/ts/SliderControllerVertical.ts ***!
+  \********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "SliderControllerVertical": () => (/* binding */ SliderControllerVertical)
 /* harmony export */ });
+function SliderControllerVertical(model, view) {
+  var _model$getModel = model.getModel(),
+      step = _model$getModel.step,
+      min = _model$getModel.min,
+      max = _model$getModel.max,
+      position = _model$getModel.position;
+
+  var thumb = document.querySelector('.range-slider-thumb_vertical');
+  var rangeSlider = document.querySelector('.range-slider_vertical');
+  var progressBar = document.querySelector('.range-slider-progress_vertical'); // const scale: HTMLElement = document.querySelector('.range-slider-scale_vertical')
+
+  var box = rangeSlider.getBoundingClientRect();
+  var progressInput = document.querySelector('.colorBar');
+  var progressThumb = document.querySelector('.colorThumb');
+  progressInput.addEventListener('input', function () {
+    model.setColorBar(progressInput.value);
+  });
+  progressThumb.addEventListener('input', function () {
+    model.setColorThumb(progressThumb.value);
+  });
+
+  rangeSlider.onmousedown = function (event) {
+    event.preventDefault();
+    var shiftY = event.clientY - thumb.getBoundingClientRect().top;
+    var rightEdge = rangeSlider.offsetHeight - thumb.offsetHeight;
+
+    var rangeKeeper = function rangeKeeper(count) {
+      var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : rightEdge;
+
+      if (count < min) {
+        return min;
+      }
+
+      if (count > max) {
+        return max;
+      }
+
+      return count;
+    };
+
+    var clickLeft = event.clientY - thumb.offsetHeight / 2 - rangeSlider.getBoundingClientRect().top;
+    thumb.style.top = rangeKeeper(clickLeft) + 'px';
+    document.addEventListener('mousemove', onMouseMove);
+    var newLeft = event.clientY - shiftY - rangeSlider.getBoundingClientRect().top;
+    var current = thumb.getBoundingClientRect().top - rangeSlider.getBoundingClientRect().top;
+    progressBar.style.height = Math.round(current / rightEdge * 100) + '%';
+    thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (newLeft / rightEdge * 100 / 100)), min, max) + '';
+
+    function onMouseMove(event) {
+      var current = thumb.getBoundingClientRect().top - rangeSlider.getBoundingClientRect().top;
+      var newLeft = event.clientY - shiftY - rangeSlider.getBoundingClientRect().top;
+      var stepLeft = Math.round(newLeft / step) * step;
+      thumb.style.top = rangeKeeper(newLeft + stepLeft) + 'px';
+      progressBar.style.height = Math.round(current / rightEdge * 100) + '%';
+      thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (rangeKeeper(newLeft + stepLeft) / rightEdge * 100 / 100)), min, max) + '';
+    }
+
+    document.addEventListener('mouseup', function () {
+      document.removeEventListener('mousemove', onMouseMove);
+    });
+  };
+}
+
+/***/ }),
+
+/***/ "./src/ts/SliderViewVertical.ts":
+/*!**************************************!*\
+  !*** ./src/ts/SliderViewVertical.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SliderViewVertical": () => (/* binding */ SliderViewVertical)
+/* harmony export */ });
+/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+function SliderViewVertical(model, rootEl) {
+  var _this = this;
+
+  model.changed.addObserver(this);
+
+  var _model$getModel = model.getModel(),
+      min = _model$getModel.min,
+      max = _model$getModel.max,
+      step = _model$getModel.step,
+      position = _model$getModel.position;
+
+  this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(rootEl);
+  this.thumb = $('<div class="range-slider-thumb_vertical"><div/>').appendTo(this.slider);
+  this.thumb.css('color', "white");
+  this.thumb.css('textAlign', 'center');
+  this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider);
+  this.scale = $('<div class="range-slider-scale_vertical"><div/>').appendTo(this.slider);
+
+  for (var i = 0; i <= 20; i++) {
+    if (i === 0 || i % 5 === 0) {
+      this.scaleValue = $('<div class="range-slider-scale-item_text"><div/>').appendTo(this.scale);
+    } else {
+      this.scaleValue = $('<div class="range-slider-scale-item_small"><div/>').appendTo(this.scale);
+    }
+  }
+
+  var textValue = document.querySelectorAll('.range-slider-scale-item_text');
+  var counter = 0;
+
+  for (var value = min; value <= max; value++) {
+    if (value === min || value / (Math.abs(min) + max) * 100 % 25 === 0) {
+      textValue[counter].innerText = value;
+      counter++;
+    }
+  }
+
+  this.subscribe = function (func) {
+    func(_this);
+  };
+}
+
+/***/ }),
+
+/***/ "./src/ts/interface.ts":
+/*!*****************************!*\
+  !*** ./src/ts/interface.ts ***!
+  \*****************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SliderController": () => (/* binding */ SliderController)
+/* harmony export */ });
+function SliderController(model, view) {
+  var _model$getModel = model.getModel(),
+      step = _model$getModel.step,
+      min = _model$getModel.min,
+      max = _model$getModel.max,
+      position = _model$getModel.position;
+
+  var thumb = document.querySelector('.range-slider-thumb');
+  var rangeSlider = document.querySelector('.range-slider');
+  var progressBar = document.querySelector('.range-slider-progress');
+  var scale = document.querySelector('.range-slider-scale');
+  var box = rangeSlider.getBoundingClientRect();
+  var progressInput = document.querySelector('.colorBar');
+  var progressThumb = document.querySelector('.colorThumb');
+  progressInput.addEventListener('input', function () {
+    model.setColorBar(progressInput.value);
+  });
+  progressThumb.addEventListener('input', function () {
+    model.setColorThumb(progressThumb.value);
+  });
+
+  rangeSlider.onmousedown = function (event) {
+    event.preventDefault();
+    var shiftX = event.clientX - thumb.getBoundingClientRect().left;
+    var rightEdge = rangeSlider.offsetWidth - thumb.offsetWidth;
+
+    var rangeKeeper = function rangeKeeper(count) {
+      var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+      var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : rightEdge;
+
+      if (count < min) {
+        return min;
+      }
+
+      if (count > max) {
+        return max;
+      }
+
+      return count;
+    };
+
+    var clickLeft = event.clientX - thumb.offsetWidth / 2 - rangeSlider.getBoundingClientRect().left;
+    thumb.style.left = rangeKeeper(clickLeft) + 'px';
+    document.addEventListener('mousemove', onMouseMove);
+    var newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left;
+    var current = thumb.getBoundingClientRect().left - rangeSlider.getBoundingClientRect().left;
+    progressBar.style.width = Math.round(current / rightEdge * 100) + '%';
+    thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (newLeft / rightEdge * 100 / 100)), min, max) + '';
+
+    function onMouseMove(event) {
+      var current = thumb.getBoundingClientRect().left - rangeSlider.getBoundingClientRect().left;
+      var newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left;
+      var stepLeft = Math.round(newLeft / step) * step;
+      thumb.style.left = rangeKeeper(newLeft + stepLeft) + 'px';
+      progressBar.style.width = Math.round(current / rightEdge * 100) + '%';
+      thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (rangeKeeper(newLeft + stepLeft) / rightEdge * 100 / 100)), min, max) + '';
+    }
+
+    document.addEventListener('mouseup', function () {
+      document.removeEventListener('mousemove', onMouseMove);
+    });
+  };
+}
+
+/***/ }),
+
+/***/ "./src/ts/sliderModel.ts":
+/*!*******************************!*\
+  !*** ./src/ts/sliderModel.ts ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SliderModel": () => (/* binding */ SliderModel)
+/* harmony export */ });
+/* harmony import */ var _sliderObserver__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sliderObserver */ "./src/ts/sliderObserver.ts");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var Model = /*#__PURE__*/function () {
-  function Model(step, vertical, colorBar, colorMark, range) {
-    _classCallCheck(this, Model);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+
+var SliderModel = /*#__PURE__*/function () {
+  function SliderModel(step, position, colorBar, colorThumb, range, from, to, min, max) {
+    _classCallCheck(this, SliderModel);
+
+    _defineProperty(this, "changed", (0,_sliderObserver__WEBPACK_IMPORTED_MODULE_0__.MakeObserverSubject)());
 
     this.step = step;
-    this.vertical = vertical;
+    this.position = position;
     this.colorBar = colorBar;
-    this.colorMark = colorMark;
+    this.colorThumb = colorThumb;
     this.range = range;
+    this.from = from;
+    this.to = to;
+    this.min = min;
+    this.max = max;
     this.step = step || 1;
-    this.vertical = vertical || false;
-    this.colorBar = colorBar || '#eb4034';
-    this.colorMark = colorMark || '#eb4034';
+    this.position = position || "gorizontal";
+    this.colorBar = colorBar || '#32a85c';
+    this.colorThumb = colorThumb || '#5032a8';
     this.range = range || [1, 100];
+    this.min = min || 0;
+    this.max = max || 100;
+    this.from = from;
+    this.to = to;
   }
 
-  _createClass(Model, [{
+  _createClass(SliderModel, [{
     key: "setStep",
     value: function setStep(step) {
+      var _this = this;
+
       this.step = step;
+      this.changed.notifyObservers(function () {
+        console.log(_this.step);
+      });
+    }
+  }, {
+    key: "setPosition",
+    value: function setPosition(position) {
+      this.position = position === "vertical" ? "vertical" : "gorizontal";
+    }
+  }, {
+    key: "setColorBar",
+    value: function setColorBar(color) {
+      var _this2 = this;
+
+      this.colorBar = color;
+      this.changed.notifyObservers(function (o) {
+        o.progressBar.css('background', _this2.getModel().colorBar);
+      });
+    }
+  }, {
+    key: "setColorThumb",
+    value: function setColorThumb(color) {
+      var _this3 = this;
+
+      this.colorThumb = color;
+      this.changed.notifyObservers(function (o) {
+        o.thumb.css('background', _this3.getModel().colorThumb);
+      });
     }
   }, {
     key: "getModel",
     value: function getModel() {
       return {
         step: this.step,
-        vertical: this.vertical,
-        colorBar: this.colorBar
+        position: this.position,
+        colorBar: this.colorBar,
+        colorThumb: this.colorThumb,
+        range: this.range,
+        from: this.from,
+        to: this.to,
+        min: this.min,
+        max: this.max
       };
     }
   }]);
 
-  return Model;
+  return SliderModel;
 }();
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Model);
+/***/ }),
+
+/***/ "./src/ts/sliderObserver.ts":
+/*!**********************************!*\
+  !*** ./src/ts/sliderObserver.ts ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "MakeObserverSubject": () => (/* binding */ MakeObserverSubject)
+/* harmony export */ });
+function MakeObserverSubject() {
+  var observers = [];
+
+  var addObserver = function addObserver(o) {
+    observers.push(o);
+  };
+
+  var getObservers = function getObservers() {
+    return observers;
+  };
+
+  var removeObserver = function removeObserver(o) {
+    observers.splice(observers.indexOf(o), 1);
+  };
+
+  var notifyObservers = function notifyObservers(func) {
+    var observerSnapshot = observers.slice(0);
+
+    for (var i in observerSnapshot) {
+      observerSnapshot[i].subscribe(func);
+    }
+  };
+
+  return {
+    addObserver: addObserver,
+    removeObserver: removeObserver,
+    notifyObservers: notifyObservers,
+    notify: notifyObservers
+  };
+}
+
+/***/ }),
+
+/***/ "./src/ts/view.ts":
+/*!************************!*\
+  !*** ./src/ts/view.ts ***!
+  \************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "SliderView": () => (/* binding */ SliderView)
+/* harmony export */ });
+/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+function SliderView(model, rootEl) {
+  var _this = this;
+
+  model.changed.addObserver(this);
+
+  var _model$getModel = model.getModel(),
+      min = _model$getModel.min,
+      max = _model$getModel.max,
+      step = _model$getModel.step,
+      position = _model$getModel.position;
+
+  this.slider = $('<div class="range-slider"><div/>').appendTo(rootEl);
+  this.thumb = $('<div class="range-slider-thumb"><div/>').appendTo(this.slider);
+  this.thumb.css('color', "white");
+  this.thumb.css('textAlign', 'center');
+  this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider);
+  this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider);
+
+  for (var i = 0; i <= 20; i++) {
+    if (i === 0 || i % 5 === 0) {
+      this.scaleValue = $('<div class="range-slider-scale-item_text"><div/>').appendTo(this.scale);
+    } else {
+      this.scaleValue = $('<div class="range-slider-scale-item_small"><div/>').appendTo(this.scale);
+    }
+  }
+
+  var textValue = document.querySelectorAll('.range-slider-scale-item_text');
+  var counter = 0;
+
+  for (var value = min; value <= max; value++) {
+    if (value === min || value / (Math.abs(min) + max) * 100 % 25 === 0) {
+      textValue[counter].innerText = value;
+      counter++;
+    }
+  }
+
+  this.subscribe = function (func) {
+    func(_this);
+  };
+}
 
 /***/ }),
 
@@ -10989,18 +11345,6 @@ __webpack_require__.r(__webpack_exports__);
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
-/******/ 		};
-/******/ 	})();
-/******/ 	
 /******/ 	/* webpack/runtime/define property getters */
 /******/ 	(() => {
 /******/ 		// define getter functions for harmony exports
@@ -11039,48 +11383,26 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _scss_index_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./scss/index.scss */ "./src/scss/index.scss");
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _ts_model__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ts/model */ "./src/ts/model.ts");
+/* harmony import */ var _ts_sliderModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ts/sliderModel */ "./src/ts/sliderModel.ts");
+/* harmony import */ var _ts_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ts/view */ "./src/ts/view.ts");
+/* harmony import */ var _ts_SliderViewVertical__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ts/SliderViewVertical */ "./src/ts/SliderViewVertical.ts");
+/* harmony import */ var _ts_interface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ts/interface */ "./src/ts/interface.ts");
+/* harmony import */ var _ts_SliderControllerVertical__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ts/SliderControllerVertical */ "./src/ts/SliderControllerVertical.ts");
 /* provided dependency */ var jQuery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 
 
 
-var slider = new _ts_model__WEBPACK_IMPORTED_MODULE_2__.default();
-slider.setStep(3);
-console.log(slider.getModel());
+
+
+
 
 (function ($) {
-  $.fn.greenify = function () {};
+  var model = new _ts_sliderModel__WEBPACK_IMPORTED_MODULE_1__.SliderModel();
+  model.setPosition("vertical");
+  var options = model.getModel();
+  var view = options.position === "gorizontal" ? new _ts_view__WEBPACK_IMPORTED_MODULE_2__.SliderView(model, $('<div class="slider-container"><div/>').appendTo($("body"))) : new _ts_SliderViewVertical__WEBPACK_IMPORTED_MODULE_3__.SliderViewVertical(model, $('<div class="slider-container"><div/>').appendTo($("body")));
+  var controller = options.position === "gorizontal" ? new _ts_interface__WEBPACK_IMPORTED_MODULE_4__.SliderController(model, view) : new _ts_SliderControllerVertical__WEBPACK_IMPORTED_MODULE_5__.SliderControllerVertical(model, view);
 })(jQuery);
-
-jquery__WEBPACK_IMPORTED_MODULE_1__('body').greenify();
-var mark = document.getElementsByClassName('range-slider-mark')[0];
-
-mark.onmousedown = function (event) {
-  moveAt(event.pageX);
-
-  function moveAt(pageX) {
-    mark.style.left = pageX - mark.offsetWidth / 2 + 'px';
-  }
-
-  function onMouseMove(event) {
-    moveAt(event.pageX);
-  }
-
-  document.addEventListener('mousemove', onMouseMove);
-
-  mark.onmouseup = function () {
-    console.log(124);
-    document.removeEventListener('mousemove', onMouseMove);
-    document.removeEventListener('mousedown', onMouseMove);
-    mark.onmouseup = null;
-  };
-};
-
-mark.ondragstart = function () {
-  return false;
-};
 })();
 
 /******/ })()

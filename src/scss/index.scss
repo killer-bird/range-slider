@@ -5,14 +5,22 @@ body{
   background: beige;
   .slider-container{
     margin: 50px 0 0 0;
-    width: 266px;
+    width: fit-content;
+    height: fit-content;
     padding: 0 5px;
     .range-slider{
       height: 15px;
-      width: 100%;
+      width: 266px;
       background: darkgray;
       border-radius: 5px;
       position: relative;
+      &_vertical{
+        height: 266px;
+        width: 15px;
+        background: darkgray;
+        border-radius: 5px;
+        position: relative;
+      }
     }
     .range-slider-thumb{
       position: absolute;
@@ -22,12 +30,27 @@ body{
       background: red;
       bottom: -4px;
       cursor: pointer;
+      &_vertical{
+        position: absolute;
+        height: 25px;
+        width: 25px;
+        border-radius: 50%;
+        background: red;
+        right: -5px;
+        cursor: pointer;
+      }
     }
     .range-slider-progress{
       height: 100%;
       width: 0;
       border-radius: 5px;
       background: blue;
+      &_vertical{
+        height: 0;
+        width: 100%;
+        border-radius: 5px;
+        background: blue;
+      }
     }
     .range-slider-scale {
       margin: 5px 0;
@@ -42,6 +65,7 @@ body{
           width: 1px;
           background: black;
           margin-right: 12px;
+          text-align: center;
         }
         &_small{
           width: 1px;
@@ -50,8 +74,29 @@ body{
           margin-right: 11px;
         }
       }
-
-
+      &_vertical{
+        margin: 5px 0;
+        height: 94%;
+        width: 30px;
+        position: absolute;
+        right: 5px;
+        top: 4px;
+        .range-slider-scale-item{
+          &_text{
+            height: 1px;
+            width: 8px;
+            background: black;
+            margin-right: 13px;
+            text-align: center;
+          }
+          &_small{
+            width: 4px;
+            height: 1px;
+            background: black;
+            margin-bottom: 14px;
+          }
+        }
+      }
     }
   }
 }

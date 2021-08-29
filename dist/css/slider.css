@@ -2,21 +2,31 @@
   !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/scss/index.scss ***!
   \**************************************************************************************************************/
 body {
+  margin: 0;
+  padding: 10%;
   background: beige;
 }
-body .slide-container {
-  height: 15px;
-  width: 266px;
+body .slider-container {
+  margin: 50px 0 0 0;
+  width: fit-content;
+  height: fit-content;
   padding: 0 5px;
 }
-body .slide-container .range-slider {
-  height: 100%;
-  width: 100%;
+body .slider-container .range-slider {
+  height: 15px;
+  width: 266px;
   background: darkgray;
   border-radius: 5px;
   position: relative;
 }
-body .slide-container .range-slider .range-slider-mark {
+body .slider-container .range-slider_vertical {
+  height: 266px;
+  width: 15px;
+  background: darkgray;
+  border-radius: 5px;
+  position: relative;
+}
+body .slider-container .range-slider-thumb {
   position: absolute;
   height: 25px;
   width: 25px;
@@ -24,6 +34,69 @@ body .slide-container .range-slider .range-slider-mark {
   background: red;
   bottom: -4px;
   cursor: pointer;
+}
+body .slider-container .range-slider-thumb_vertical {
+  position: absolute;
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  background: red;
+  right: -5px;
+  cursor: pointer;
+}
+body .slider-container .range-slider-progress {
+  height: 100%;
+  width: 0;
+  border-radius: 5px;
+  background: blue;
+}
+body .slider-container .range-slider-progress_vertical {
+  height: 0;
+  width: 100%;
+  border-radius: 5px;
+  background: blue;
+}
+body .slider-container .range-slider-scale {
+  margin: 5px 0;
+  width: 94%;
+  height: 30px;
+  display: flex;
+  position: absolute;
+  left: 13px;
+}
+body .slider-container .range-slider-scale .range-slider-scale-item_text {
+  height: 8px;
+  width: 1px;
+  background: black;
+  margin-right: 12px;
+  text-align: center;
+}
+body .slider-container .range-slider-scale .range-slider-scale-item_small {
+  width: 1px;
+  height: 4px;
+  background: black;
+  margin-right: 11px;
+}
+body .slider-container .range-slider-scale_vertical {
+  margin: 5px 0;
+  height: 94%;
+  width: 30px;
+  position: absolute;
+  right: 5px;
+  top: 4px;
+}
+body .slider-container .range-slider-scale_vertical .range-slider-scale-item_text {
+  height: 1px;
+  width: 8px;
+  background: black;
+  margin-right: 13px;
+  text-align: center;
+}
+body .slider-container .range-slider-scale_vertical .range-slider-scale-item_small {
+  width: 4px;
+  height: 1px;
+  background: black;
+  margin-bottom: 14px;
 }
 
 /*# sourceMappingURL=slider.css.map*/
