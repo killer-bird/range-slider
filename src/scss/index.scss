@@ -1,20 +1,23 @@
 
-body{
+body {
   margin: 0;
   padding: 10%;
   background: beige;
-  .slider-container{
+
+  .slider-container {
     margin: 50px 0 0 0;
     width: fit-content;
     height: fit-content;
     padding: 0 5px;
-    .range-slider{
+
+    .range-slider {
       height: 15px;
       width: 266px;
       background: darkgray;
       border-radius: 5px;
       position: relative;
-      &_vertical{
+
+      &_vertical {
         height: 266px;
         width: 15px;
         background: darkgray;
@@ -22,7 +25,8 @@ body{
         position: relative;
       }
     }
-    .range-slider-thumb{
+
+    .range-slider-thumb {
       position: absolute;
       height: 25px;
       width: 25px;
@@ -30,7 +34,7 @@ body{
       background: red;
       bottom: -4px;
       cursor: pointer;
-      &_vertical{
+      &_vertical {
         position: absolute;
         height: 25px;
         width: 25px;
@@ -40,18 +44,20 @@ body{
         cursor: pointer;
       }
     }
-    .range-slider-progress{
+
+    .range-slider-progress {
       height: 100%;
       width: 0;
       border-radius: 5px;
       background: blue;
-      &_vertical{
+      &_vertical {
         height: 0;
         width: 100%;
         border-radius: 5px;
         background: blue;
       }
     }
+
     .range-slider-scale {
       margin: 5px 0;
       width: 94%;
@@ -59,37 +65,41 @@ body{
       display: flex;
       position: absolute;
       left: 13px;
-      .range-slider-scale-item{
-        &_text{
+      .range-slider-scale-item {
+        &_text {
           height: 8px;
           width: 1px;
           background: black;
           margin-right: 12px;
           text-align: center;
         }
-        &_small{
+
+        &_small {
           width: 1px;
           height: 4px;
           background: black;
           margin-right: 11px;
         }
       }
-      &_vertical{
+
+      &_vertical {
         margin: 5px 0;
         height: 94%;
         width: 30px;
         position: absolute;
         right: 5px;
         top: 4px;
-        .range-slider-scale-item{
-          &_text{
+
+        .range-slider-scale-item {
+          &_text {
             height: 1px;
             width: 8px;
             background: black;
             margin-right: 13px;
             text-align: center;
           }
-          &_small{
+
+          &_small {
             width: 4px;
             height: 1px;
             background: black;

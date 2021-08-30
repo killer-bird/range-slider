@@ -33,6 +33,15 @@ export class SliderModel {
     setPosition(position: string): void {
         this.position = position ==="vertical" ? "vertical":"gorizontal"
     }
+    setFrom(from:number):void{
+        this.from = from
+    }
+    setMin(min:number):void{
+        this.min = min
+    }
+    setMax(max:number):void{
+        this.max = max
+    }
     setColorBar(color: string): void {
         this.colorBar = color;
         this.changed.notifyObservers((o) => {

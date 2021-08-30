@@ -6,8 +6,10 @@ import {SliderController} from "./ts/interface";
 import{SliderControllerVertical} from "./ts/SliderControllerVertical";
 
 (function ($) {
+    const positionInput:HTMLInputElement = document.querySelector('.position')
+
     let model = new SliderModel()
-    model.setPosition("vertical")
+    // model.setPosition("vertical")
     let options = model.getModel()
     let view = options.position ==="gorizontal"? new SliderView(model, $('<div class="slider-container"><div/>').appendTo($("body"))):
         new SliderViewVertical(model, $('<div class="slider-container"><div/>').appendTo($("body")));

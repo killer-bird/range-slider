@@ -1,7 +1,5 @@
 export function SliderView(model, rootEl) {
     model.changed.addObserver(this)
-
-    let {min, max, step, position} = model.getModel()
     this.slider = $('<div class="range-slider"><div/>').appendTo(rootEl)
     this.thumb = $('<div class="range-slider-thumb"><div/>').appendTo(this.slider)
     this.thumb.css('color', "white")
@@ -18,12 +16,18 @@ export function SliderView(model, rootEl) {
     }
     let textValue: NodeListOf<HTMLElement> = document.querySelectorAll('.range-slider-scale-item_text')
     let counter = 0;
-    for (let value = min; value <= max; value++) {
-        if (value === min || (value / (Math.abs(min) + max)) * 100 % 25 === 0) {
-            textValue[counter].innerText = value
-            counter++
+    this.renderScale = ()=>{
+        let {min, max} = model.getModel()
+        console.log()
+        let counter = 0;
+        for (let value = min; value <= max; value++) {
+            if (value === min || (value / (Math.abs(min) + max)) * 100 % 25 === 0) {
+                textValue[counter].innerText = value
+                counter++
+            }
         }
     }
+    this.renderScale()
     this.subscribe = (func) => {
         func(this)
     }

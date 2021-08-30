@@ -1,6 +1,6 @@
 export function SliderViewVertical(model, rootEl) {
     model.changed.addObserver(this)
-    let {min, max, step, position} = model.getModel()
+
     this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(rootEl)
     this.thumb = $('<div class="range-slider-thumb_vertical"><div/>').appendTo(this.slider)
     this.thumb.css('color', "white")
@@ -16,13 +16,18 @@ export function SliderViewVertical(model, rootEl) {
         }
     }
     let textValue: NodeListOf<HTMLElement> = document.querySelectorAll('.range-slider-scale-item_text')
-    let counter = 0;
-    for (let value = min; value <= max; value++) {
-        if (value === min || (value / (Math.abs(min) + max)) * 100 % 25 === 0) {
-            textValue[counter].innerText = value
-            counter++
+
+    this.renderScale = ()=>{
+        let {min, max} = model.getModel()
+        let counter = 0;
+        for (let value = min; value <= max; value++) {
+            if (value === min || (value / (Math.abs(min) + max)) * 100 % 25 === 0) {
+                textValue[counter].innerText = value
+                counter++
+            }
         }
     }
+
     this.subscribe = (func) => {
         func(this)
     }
