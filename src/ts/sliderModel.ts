@@ -7,7 +7,7 @@ export class SliderModel {
         private position?:  string,
         private colorBar?: string,
         private colorThumb?: string,
-        private range?: number[],
+        private start?: number[],
         private from?: number,
         private to?: number,
         private min?: number,
@@ -17,10 +17,10 @@ export class SliderModel {
         this.position = position || "gorizontal"
         this.colorBar = colorBar || '#32a85c'
         this.colorThumb = colorThumb || '#5032a8'
-        this.range = range || [1, 100]
+        this.start = start || [20, 80]
         this.min = min || 0
         this.max = max || 100
-        this.from = from
+        this.from = from || 0
         this.to = to
     }
     changed = MakeObserverSubject();
@@ -55,13 +55,14 @@ export class SliderModel {
         })
     }
 
+
     getModel() {
         return {
             step: this.step,
             position: this.position,
             colorBar: this.colorBar,
             colorThumb: this.colorThumb,
-            range: this.range,
+            start: this.start,
             from: this.from,
             to: this.to,
             min: this.min,

@@ -2,7 +2,8 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "types": ["jquery","bootstrap","signalr"]
+    "types": ["jquery","bootstrap","signalr"],
+    "target": "es2015"
   },
   "exclude": [
     "test.ts",
