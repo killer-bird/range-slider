@@ -1,3 +1,33 @@
+export default class Observer {
+    public observers:object[]
+
+
+    constructor() {
+        this.observers = []
+    }
+
+
+    register(o:object):void{
+        this.observers.push(o)
+    }
+
+    unregister(o:object):void{
+        this.observers.splice(this.observers.indexOf(o),1)
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function MakeObserverSubject() {
     let observers = [];
     let addObserver = (o): void => {

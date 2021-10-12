@@ -1,40 +1,39 @@
-import {MakeObserverSubject} from "./sliderObserver";
+export class SliderModel{
 
-export class SliderModel {
+    public step:number
+    public min :number
+    public max:number
+    public from :number
+    public to :number
 
-    constructor(
-        private step?: number,
-        private position?:  string,
-        private colorBar?: string,
-        private colorThumb?: string,
-        private start?: number[],
-        private from?: number,
-        private to?: number,
-        private min?: number,
-        private max?: number
-    ) {
-        this.step = step || 1
-        this.position = position || "gorizontal"
-        this.colorBar = colorBar || '#32a85c'
-        this.colorThumb = colorThumb || '#5032a8'
-        this.start = start || [20, 80]
-        this.min = min || 0
-        this.max = max || 100
-        this.from = from || 0
-        this.to = to
+    constructor(public options:object) {
+        this.step = options['step']
+        this.min = options['min']
+        this.max = options['max']
+        this.from = options['values'][0]
+        this.to = options['values'][1]
+
     }
-    changed = MakeObserverSubject();
+
+
+
+
+    public setOptions(options:object){
+        this.options = {...this.options, ...options}
+    }
+
     setStep(step: number): void {
         this.step = step;
-        this.changed.notifyObservers(() => {
-            console.log(this.step)
-        })
     }
     setPosition(position: string): void {
-        this.position = position ==="vertical" ? "vertical":"gorizontal"
+
     }
+
     setFrom(from:number):void{
         this.from = from
+    }
+    setTo(to:number):void{
+        this.to = to
     }
     setMin(min:number):void{
         this.min = min
@@ -54,7 +53,9 @@ export class SliderModel {
             o.thumb.css('background', this.getModel().colorThumb)
         })
     }
-
+    getOptions(){
+        return this.options
+    }
 
     getModel() {
         return {

@@ -12,11 +12,11 @@ body {
     position: relative;
 
     .range-slider {
-      height: 15px;
-      width: 266px;
+      height: 8px;
+      width: 300px;
       display: block;
       background: darkgray;
-      border-radius: 5px;
+      border-radius: 3px;
       position: relative;
 
       &_vertical {
@@ -26,16 +26,27 @@ body {
         border-radius: 5px;
         position: relative;
       }
+
+    }
+    .range-slider-value{
+      width: 25px;
+      height: 25px;
+      background: blue;
+      position: absolute;
+      bottom: 25px;
+      color: white;
+      text-align: center;
     }
 
-    .range-slider-thumb-lower {
+    .range-slider-thumb-lower, .range-slider-thumb-upper {
+      z-index: 3;
       display: block;
       position: absolute;
-      height: 25px;
-      width: 25px;
+      height: 23px;
+      width: 23px;
       border-radius: 50%;
       background: red;
-      bottom: -4px;
+      bottom: -7px;
       cursor: pointer;
       color: white;
       text-align: center;
@@ -51,10 +62,10 @@ body {
     }
 
     .range-slider-progress {
+      position: relative;
       height: 100%;
       width: 0;
-      max-width: 100%;
-      border-radius: 5px;
+      border-radius: 3px;
       background: blue;
       &_vertical {
         height: 0;
@@ -66,27 +77,11 @@ body {
 
     .range-slider-scale {
       margin: 5px 0;
-      width: 94%;
+      width: 100%;
       height: 30px;
       display: flex;
       position: absolute;
-      left: 13px;
-      .range-slider-scale-item {
-        &_text {
-          height: 8px;
-          width: 1px;
-          background: black;
-          margin-right: 12px;
-          text-align: center;
-        }
 
-        &_small {
-          width: 1px;
-          height: 4px;
-          background: black;
-          margin-right: 11px;
-        }
-      }
 
       &_vertical {
         margin: 5px 0;
