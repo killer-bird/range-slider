@@ -30,7 +30,7 @@ export default class Controller {
                 let stepDiv = Math.round((max * newLeft / this.view.sliderEdge) / step)
                 let thumbWidth = (stepDiv * step)
                 let position = thumbWidth / max * this.view.sliderEdge
-                let value  = Math.abs(max) *( position/this.view.sliderEdge * 100)/100
+                let value  = this.view.slider[0].offsetWidth * Math.round(position/this.view.sliderEdge * 100)/100
 
                 this.view.thumbFrom[0].style.left = pointerKeeper(position) + 'px';
                 this.view.sliderValue[0].innerText =  pointerKeeper(value, this.model.min, this.model.max)

@@ -1,9 +1,9 @@
 import {ModelOptions} from "./interfases";
 
 export const defaultSettings: ModelOptions = {
-    step: 35,
-    min:  -100,
-    max: 100,
+    step: 1,
+    min:  0,
+    max: 300,
     values: [20,60],
     vertical: false,
     colorBar: '#32a85c',
