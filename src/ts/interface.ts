@@ -15,6 +15,7 @@ export default class Controller {
         this.view.slider[0].onpointerdown =  (e)=> {
             e.preventDefault()
             let shiftX = e.offsetX
+            let shiftY = e.offsetY
             const pointerKeeper  = (pos:number, min:number=0, max:number=this.view.sliderEdge) =>{
                 if (pos<min){
                     return min
@@ -26,17 +27,45 @@ export default class Controller {
             }
             const onPointerMove = (e) => {
                 let {step, min, max} = this.model
-                let newLeft = e.clientX - shiftX - this.view.slider[0].getBoundingClientRect().left
-                let stepDiv = Math.round((max * newLeft / this.view.sliderEdge) / step)
-                let thumbWidth = (stepDiv * step)
-                let position = thumbWidth / max * this.view.sliderEdge
-                let value  = this.view.slider[0].offsetWidth * Math.round(position/this.view.sliderEdge * 100)/100
+                let newLeft,
+                    stepDiv,
+                    thumbWidth,
+                    position
 
-                this.view.thumbFrom[0].style.left = pointerKeeper(position) + 'px';
+                if (this.view.viewState.vertical){
+                    newLeft = this.view.slider[0].offsetHeight - e.clientY-shiftY+this.view.slider[0].getBoundingClientRect().top
+
+                }else {
+                    newLeft = e.clientX - shiftX - this.view.slider[0].getBoundingClientRect().left
+                }
+                stepDiv = Math.round((max * newLeft / this.view.sliderEdge) / step)
+                thumbWidth = (stepDiv * step)
+                position = thumbWidth / max * this.view.sliderEdge
+
+                if (this.view.viewState.vertical){
+                    let progress = thumbWidth / max * 100
+                    this.view.pointer[0].style.bottom = pointerKeeper(position) + 'px';
+                    this.view.sliderValue[0].style.bottom =  pointerKeeper(position) + 'px';
+                    this.view.progressBar[0].style.height = pointerKeeper(progress, 0, 100)+ '%'
+
+                }else {
+                    let progress = thumbWidth / max * 100
+                    this.view.pointer[0].style.left = pointerKeeper(position) + 'px';
+                    this.view.sliderValue[0].style.left =  pointerKeeper(position) + 'px';
+                    this.view.progressBar[0].style.width = pointerKeeper(progress, 0, 100)+ '%'
+                }
+
+                // решить проблему со сдвигом
+                let pos = this.view.pointer[0].getBoundingClientRect().left -  this.view.slider[0].getBoundingClientRect().left
+                let sum = (max-min)/100
+
+                let test = (max-min) * Math.round(position/this.view.sliderEdge * 100)/(max-min)
+
+
+                let value = (max-min) * Math.round(position/this.view.sliderEdge * 100)/100 + min
+                value = test
+                    // value = pointerKeeper((stepDiv * step), min, max )
                 this.view.sliderValue[0].innerText =  pointerKeeper(value, this.model.min, this.model.max)
-                this.view.sliderValue[0].style.left =  pointerKeeper(position) + 'px';
-                let progress = thumbWidth / max * 100
-                this.view.progressBar[0].style.width = pointerKeeper(progress, 0, 100)+ '%'
 
                 // shiftX = shiftX*0.5
                 // let newPos = e.pageX - shiftX - this.view.slider[0].getBoundingClientRect().left
