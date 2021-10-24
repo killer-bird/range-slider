@@ -1,31 +1,71 @@
 export default class Observer {
-    public observers:object[]
+    public model;
+    public controller;
+    public proxyModel
+
+    constructor(model, controller) {
+        this.model = model
+        this.controller = controller
+        this.proxyModel = new Proxy(model, {
+            set(target: any, p: string | symbol, value: any, receiver: any): boolean {
+                switch (p) {
+                    case "step":
+                        target.setStep(value)
+                        return
+                    case "min":
+                        target.setMin(value)
+                        controller.updateSlider()
+                        return
+                    case "max":
+                        target.setMax(value)
+                        controller.updateSlider()
+                        return
+                    case "colorBar":
+                        target.setColorBar(value)
+                        controller.changeColorBar(value)
+                        return
+                    case "colorThumb":
+                        target.setColorPointer(value)
+                        controller.changeColorPointer(value)
+                        return
+                    case "vertical":
+                        console.log("VERTICAL", value)
+                        if (!target['vertical'] === value) {
+                            target.setVertical(value)
+                            controller.updateSlider()
+                        }
+                        return
+                    case "scale":
+                        if (!target['scale'] === value) {
+                            target.setScale(value)
+                            controller.updateSlider()
+                        }
+                        return
+                    case "from":
+                        let posFrom = controller.convertValToPx(value)
+                        controller.movePointer(controller.view.pointer[0] ,posFrom, controller.getPercentage(posFrom))
+                        target.setFrom(value)
+                        return
+                    case "to":
+                        let posTo = controller.convertValToPx(value)
+                        console.log(posTo)
+                        controller.movePointer(controller.view.pointer[1] ,posTo, controller.getPercentage(posTo))
+                        target.setFrom(value)
+                        return
+                    case "interval":
+                        if (!target['interval'] === value) {
+                            target.setInterval(value)
+                            controller.updateSlider()
+                            return
+                        }
+                }
+            }
+        })
 
 
-    constructor() {
-        this.observers = []
     }
 
-
-    register(o:object):void{
-        this.observers.push(o)
-    }
-
-    unregister(o:object):void{
-        this.observers.splice(this.observers.indexOf(o),1)
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 export function MakeObserverSubject() {

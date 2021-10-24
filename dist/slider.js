@@ -1,135 +1,107 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/ts/SliderControllerVertical.ts":
-/*!********************************************!*\
-  !*** ./src/ts/SliderControllerVertical.ts ***!
-  \********************************************/
+/***/ "./src/ts/App.ts":
+/*!***********************!*\
+  !*** ./src/ts/App.ts ***!
+  \***********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SliderControllerVertical": () => (/* binding */ SliderControllerVertical)
+/* harmony export */   "default": () => (/* binding */ App)
 /* harmony export */ });
-function SliderControllerVertical(model, view) {
-  var _model$getModel = model.getModel(),
-      step = _model$getModel.step,
-      min = _model$getModel.min,
-      max = _model$getModel.max,
-      position = _model$getModel.position;
+/* harmony import */ var _sliderModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sliderModel */ "./src/ts/sliderModel.ts");
+/* harmony import */ var _defaultModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./defaultModel */ "./src/ts/defaultModel.ts");
+/* harmony import */ var _sliderObserver__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sliderObserver */ "./src/ts/sliderObserver.ts");
+/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./view */ "./src/ts/view.ts");
+/* harmony import */ var _interface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./interface */ "./src/ts/interface.ts");
+/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  var thumb = document.querySelector('.range-slider-thumb_vertical');
-  var rangeSlider = document.querySelector('.range-slider_vertical');
-  var progressBar = document.querySelector('.range-slider-progress_vertical'); // const scale: HTMLElement = document.querySelector('.range-slider-scale_vertical')
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  var box = rangeSlider.getBoundingClientRect();
-  var progressInput = document.querySelector('.colorBar');
-  var progressThumb = document.querySelector('.colorThumb');
-  progressInput.addEventListener('input', function () {
-    model.setColorBar(progressInput.value);
-  });
-  progressThumb.addEventListener('input', function () {
-    model.setColorThumb(progressThumb.value);
-  });
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-  rangeSlider.onmousedown = function (event) {
-    event.preventDefault();
-    var shiftY = event.clientY - thumb.getBoundingClientRect().top;
-    var rightEdge = rangeSlider.offsetHeight - thumb.offsetHeight;
 
-    var rangeKeeper = function rangeKeeper(count) {
-      var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : rightEdge;
 
-      if (count < min) {
-        return min;
-      }
 
-      if (count > max) {
-        return max;
-      }
 
-      return count;
-    };
 
-    var clickLeft = event.clientY - thumb.offsetHeight / 2 - rangeSlider.getBoundingClientRect().top;
-    thumb.style.top = rangeKeeper(clickLeft) + 'px';
-    document.addEventListener('mousemove', onMouseMove);
-    var newLeft = event.clientY - shiftY - rangeSlider.getBoundingClientRect().top;
-    var current = thumb.getBoundingClientRect().top - rangeSlider.getBoundingClientRect().top;
-    progressBar.style.height = Math.round(current / rightEdge * 100) + '%';
-    thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (newLeft / rightEdge * 100 / 100)), min, max) + '';
+var pointer = document.querySelector('.range-slider-pointer');
+var rangeSlider = document.querySelector('.range-slider');
+var verticalInput = document.querySelector('.vertical');
+var scaleInput = document.querySelector('.scale');
+var progressInput = document.querySelector('.colorBar');
+var pointerInput = document.querySelector('.colorThumb');
+var stepInput = document.querySelector('.step');
+var minInput = document.querySelector('.min');
+var maxInput = document.querySelector('.max');
+var fromInput = document.querySelector('.from');
 
-    function onMouseMove(event) {
-      var current = thumb.getBoundingClientRect().top - rangeSlider.getBoundingClientRect().top;
-      var newLeft = event.clientY - shiftY - rangeSlider.getBoundingClientRect().top;
-      var stepLeft = Math.round(newLeft / step) * step;
-      thumb.style.top = rangeKeeper(newLeft + stepLeft) + 'px';
-      progressBar.style.height = Math.round(current / rightEdge * 100) + '%';
-      thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (rangeKeeper(newLeft + stepLeft) / rightEdge * 100 / 100)), min, max) + '';
+var App = /*#__PURE__*/function () {
+  function App() {
+    _classCallCheck(this, App);
+  }
+
+  _createClass(App, [{
+    key: "init",
+    value: function init() {
+      var model = new _sliderModel__WEBPACK_IMPORTED_MODULE_0__.default(this.options || _defaultModel__WEBPACK_IMPORTED_MODULE_1__.defaultSettings);
+      var container = document.createElement('div');
+      container.className = "slider-container";
+      document.body.append(container);
+      var newView = new _view__WEBPACK_IMPORTED_MODULE_3__.default(model, $('<div class="slider-container"><div/>').appendTo($("body")));
+      var controller = new _interface__WEBPACK_IMPORTED_MODULE_4__.default(model, newView);
+      var observer = new _sliderObserver__WEBPACK_IMPORTED_MODULE_2__.default(model, controller);
+      progressInput.addEventListener('change', function () {
+        observer.proxyModel.colorBar = progressInput.value;
+      });
+      pointerInput.addEventListener('change', function () {
+        observer.proxyModel.colorThumb = pointerInput.value;
+      });
+      verticalInput.addEventListener('change', function () {
+        observer.proxyModel.vertical = verticalInput.value === 'true';
+      });
+      scaleInput.addEventListener('change', function () {
+        observer.proxyModel.scale = scaleInput.value === 'true';
+      });
+      stepInput.addEventListener('change', function () {
+        observer.proxyModel.step = stepInput.value;
+      });
     }
+  }]);
 
-    document.addEventListener('mouseup', function () {
-      document.removeEventListener('mousemove', onMouseMove);
-    });
-  };
-}
+  return App;
+}();
+
+
 
 /***/ }),
 
-/***/ "./src/ts/SliderViewVertical.ts":
-/*!**************************************!*\
-  !*** ./src/ts/SliderViewVertical.ts ***!
-  \**************************************/
+/***/ "./src/ts/defaultModel.ts":
+/*!********************************!*\
+  !*** ./src/ts/defaultModel.ts ***!
+  \********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SliderViewVertical": () => (/* binding */ SliderViewVertical)
+/* harmony export */   "defaultSettings": () => (/* binding */ defaultSettings)
 /* harmony export */ });
-/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-function SliderViewVertical(model, rootEl) {
-  var _this = this;
-
-  model.changed.addObserver(this);
-
-  var _model$getModel = model.getModel(),
-      min = _model$getModel.min,
-      max = _model$getModel.max,
-      step = _model$getModel.step,
-      position = _model$getModel.position;
-
-  this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(rootEl);
-  this.thumb = $('<div class="range-slider-thumb_vertical"><div/>').appendTo(this.slider);
-  this.thumb.css('color', "white");
-  this.thumb.css('textAlign', 'center');
-  this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider);
-  this.scale = $('<div class="range-slider-scale_vertical"><div/>').appendTo(this.slider);
-
-  for (var i = 0; i <= 20; i++) {
-    if (i === 0 || i % 5 === 0) {
-      this.scaleValue = $('<div class="range-slider-scale-item_text"><div/>').appendTo(this.scale);
-    } else {
-      this.scaleValue = $('<div class="range-slider-scale-item_small"><div/>').appendTo(this.scale);
-    }
-  }
-
-  var textValue = document.querySelectorAll('.range-slider-scale-item_text');
-  var counter = 0;
-
-  for (var value = min; value <= max; value++) {
-    if (value === min || value / (Math.abs(min) + max) * 100 % 25 === 0) {
-      textValue[counter].innerText = value;
-      counter++;
-    }
-  }
-
-  this.subscribe = function (func) {
-    func(_this);
-  };
-}
+var defaultSettings = {
+  step: 1,
+  min: -100,
+  max: 200,
+  values: [20, 60],
+  vertical: false,
+  colorBar: '#32a85c',
+  colorThumb: '#5032a8',
+  scale: true,
+  interval: false
+};
 
 /***/ }),
 
@@ -142,71 +114,255 @@ function SliderViewVertical(model, rootEl) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SliderController": () => (/* binding */ SliderController)
+/* harmony export */   "default": () => (/* binding */ Controller)
 /* harmony export */ });
-function SliderController(model, view) {
-  var _model$getModel = model.getModel(),
-      step = _model$getModel.step,
-      min = _model$getModel.min,
-      max = _model$getModel.max,
-      position = _model$getModel.position;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  var thumb = document.querySelector('.range-slider-thumb');
-  var rangeSlider = document.querySelector('.range-slider');
-  var progressBar = document.querySelector('.range-slider-progress');
-  var scale = document.querySelector('.range-slider-scale');
-  var box = rangeSlider.getBoundingClientRect();
-  var progressInput = document.querySelector('.colorBar');
-  var progressThumb = document.querySelector('.colorThumb');
-  progressInput.addEventListener('input', function () {
-    model.setColorBar(progressInput.value);
-  });
-  progressThumb.addEventListener('input', function () {
-    model.setColorThumb(progressThumb.value);
-  });
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  rangeSlider.onmousedown = function (event) {
-    event.preventDefault();
-    var shiftX = event.clientX - thumb.getBoundingClientRect().left;
-    var rightEdge = rangeSlider.offsetWidth - thumb.offsetWidth;
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-    var rangeKeeper = function rangeKeeper(count) {
-      var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-      var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : rightEdge;
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-      if (count < min) {
-        return min;
-      }
+var Controller = /*#__PURE__*/function () {
+  function Controller(model, view) {
+    var _this = this;
 
-      if (count > max) {
-        return max;
-      }
+    _classCallCheck(this, Controller);
 
-      return count;
-    };
+    _defineProperty(this, "handlePointerEvent", function () {
+      console.log("handle events");
 
-    var clickLeft = event.clientX - thumb.offsetWidth / 2 - rangeSlider.getBoundingClientRect().left;
-    thumb.style.left = rangeKeeper(clickLeft) + 'px';
-    document.addEventListener('mousemove', onMouseMove);
-    var newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left;
-    var current = thumb.getBoundingClientRect().left - rangeSlider.getBoundingClientRect().left;
-    progressBar.style.width = Math.round(current / rightEdge * 100) + '%';
-    thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (newLeft / rightEdge * 100 / 100)), min, max) + '';
+      _this.view.slider[0].onpointerdown = function (e) {
+        e.preventDefault();
+        var shiftX = e.offsetX;
+        var shiftY = e.offsetY;
+        console.log(e.target.classList);
 
-    function onMouseMove(event) {
-      var current = thumb.getBoundingClientRect().left - rangeSlider.getBoundingClientRect().left;
-      var newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left;
-      var stepLeft = Math.round(newLeft / step) * step;
-      thumb.style.left = rangeKeeper(newLeft + stepLeft) + 'px';
-      progressBar.style.width = Math.round(current / rightEdge * 100) + '%';
-      thumb.innerHTML = rangeKeeper(Math.round(min + (max - min) * (rangeKeeper(newLeft + stepLeft) / rightEdge * 100 / 100)), min, max) + '';
-    }
+        if (e.target.classList.contains("range-slider")) {
+          console.log("SLIDER");
+        }
 
-    document.addEventListener('mouseup', function () {
-      document.removeEventListener('mousemove', onMouseMove);
+        if (e.target.classList.contains("range-slider-pointer")) {
+          var onPointerMove = function onPointerMove(e) {
+            var _this$model = _this.model,
+                step = _this$model.step,
+                min = _this$model.min,
+                max = _this$model.max;
+            var newLeft, stepDiv, thumbWidth, position;
+
+            if (_this.model.vertical) {
+              newLeft = _this.view.slider[0].offsetHeight - e.clientY - shiftY + _this.view.slider[0].getBoundingClientRect().top;
+            } else {
+              newLeft = e.clientX - shiftX - _this.view.slider[0].getBoundingClientRect().left;
+            }
+
+            stepDiv = Math.round(max * newLeft / _this.view.sliderEdge / step);
+            thumbWidth = stepDiv * step;
+            position = thumbWidth / max * _this.view.sliderEdge;
+
+            if (_this.model.vertical) {
+              var progress = thumbWidth / max * 100;
+              _this.view.pointer[0].style.bottom = pointerKeeper(position) + 'px';
+              _this.view.sliderValue[0].style.bottom = pointerKeeper(position) + 'px';
+              _this.view.progressBar[0].style.height = pointerKeeper(progress, 0, 100) + '%';
+            } else {
+              var _progress = thumbWidth / max * 100;
+
+              _this.view.pointer[0].style.left = pointerKeeper(position) + 'px';
+              _this.view.sliderValue[0].style.left = pointerKeeper(position) + 'px';
+              _this.view.progressBar[0].style.width = pointerKeeper(_progress, 0, 100) + '%';
+            } // решить проблему со сдвигом
+
+
+            var pos = _this.view.pointer[0].getBoundingClientRect().left - _this.view.slider[0].getBoundingClientRect().left;
+
+            var sum = (max - min) / 100;
+            var test = Math.abs(min - max) * Math.round(position / _this.view.sliderEdge * 100) / 100 + min;
+            var value = (max - min) * Math.round(position / _this.view.sliderEdge * 100) / 100 + min;
+            value = test;
+            _this.view.sliderValue[0].innerText = pointerKeeper(value, _this.model.min, _this.model.max); // shiftX = shiftX*0.5
+            // let newPos = e.pageX - shiftX - this.view.slider[0].getBoundingClientRect().left
+            // let value = Math.round(Math.abs(this.model.max + this.model.min) *newPos/this.view.sliderEdge)
+            // this.view.thumbFrom[0].style.left = pointerKeeper( newPos) + 'px'
+            // this.view.sliderValue[0].style.left = pointerKeeper( newPos) + 'px'
+            // this.view.sliderValue[0].innerText = pointerKeeper(value, this.model.min, this.model.max)
+            // this.view.progressBar[0].style.width = pointerKeeper( newPos) + 'px'
+            // console.log(e.pageX - this.view.slider[0].getBoundingClientRect().left)
+          };
+
+          var onPointerUp = function onPointerUp() {
+            document.removeEventListener('pointermove', onPointerMove);
+            document.removeEventListener('pointerup', onPointerUp);
+          };
+
+          document.addEventListener('pointermove', onPointerMove);
+          document.addEventListener('pointerup', onPointerUp);
+        }
+
+        var pointerKeeper = function pointerKeeper(pos) {
+          var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+          var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _this.view.sliderEdge + 1;
+
+          if (pos < min) {
+            return min;
+          }
+
+          if (pos > max) {
+            return max;
+          }
+
+          return pos;
+        };
+      }; // defPosition = (shiftX, event)=>{
+      //     this.sliderEdge = this.view.slider.outerWidth() - this.view.thumbFrom.outerWidth()
+      //     let {step, min, max} = this.model.getOptions()
+      //     let newLeft = event.clientX - shiftX - this.view.slider[0].getBoundingClientRect().left
+      //     console.log(newLeft)
+      //     // let stepDiv = Math.round((max * newLeft / this.sliderEdge) / step)
+      //
+      //     // let thumbWidth = (stepDiv * step)
+      //     // return Math.round(thumbWidth / max * this.sliderEdge)
+      //     return newLeft
+      // }
+      //
+      // onPointerMove = (event) => {
+      //     event.preventDefault()
+      //     let position = this.defPosition( this.shiftX, event)
+      //     this.view.changeThumbPosition(position, this.view.thumbFrom)
+      // }
+      //
+      // handleMouseEvents = ()=>{
+      //     this.view.slider[0].onpointerdown = ((event)=>{
+      //          console.log(123)
+      //          this.shiftX = event.clientX - event.target.getBoundingClientRect().left
+      //          document.addEventListener('pointermove', this.onPointerMove);
+      //          this.onPointerMove(event)
+      //     })
+      //     document.addEventListener('pointerup', () => {
+      //         document.removeEventListener('pointermove', this.onPointerMove)
+      //     })
+      // }
+
     });
-  };
-}
+
+    this.model = model;
+    this.view = view;
+    this.renderView();
+  }
+
+  _createClass(Controller, [{
+    key: "changeColorBar",
+    value: function changeColorBar(color) {
+      this.view.progressBar[0].style.background = color;
+    }
+  }, {
+    key: "changeColorPointer",
+    value: function changeColorPointer(color) {
+      this.view.pointer[0].style.background = color;
+    }
+  }, {
+    key: "updateSlider",
+    value: function updateSlider() {
+      this.view.updateSlider();
+      console.log(this.model.vertical);
+      this.handlePointerEvent();
+    }
+  }, {
+    key: "renderView",
+    value: function renderView() {
+      this.view.renderSlider();
+      this.handlePointerEvent();
+    }
+  }]);
+
+  return Controller;
+}(); // export function SliderController(model, view) {
+//     $('body').ready( () => {
+//         let {min, max} = model.getModel()
+//         const thumbFrom: HTMLElement = document.querySelector('.range-slider-thumb-lower')
+//         const thumbTo :HTMLElement = document.querySelector('.range-slider-thumb-upper')
+//
+//         const rangeSlider: HTMLElement = document.querySelector('.range-slider')!;
+//
+//         const progressInput: HTMLInputElement = document.querySelector('.colorBar')
+//         const progressThumb: HTMLInputElement = document.querySelector('.colorThumb')
+//         const stepInput: HTMLInputElement = document.querySelector('.step')
+//         const minInput: HTMLInputElement = document.querySelector('.min')
+//         const maxInput: HTMLInputElement = document.querySelector('.max')
+//         const fromInput: HTMLInputElement = document.querySelector('.from')
+//         let endSlider = rangeSlider.offsetWidth - thumbFrom.offsetWidth
+//
+//
+//         progressInput.addEventListener('input', () => {
+//             model.setColorBar(progressInput.value)
+//         })
+//         progressThumb.addEventListener('input', () => {
+//             model.setColorThumb(progressThumb.value)
+//         })
+//         stepInput.addEventListener('input', () => {
+//             model.setStep(+stepInput.value)
+//             fromInput.setAttribute("step", stepInput.value)
+//         })
+//         minInput.addEventListener('change', () => {
+//             model.setMin(+minInput.value)
+//             view.renderScale()
+//         })
+//         maxInput.addEventListener('change', () => {
+//             model.setMax(+maxInput.value)
+//             view.renderScale()
+//         })
+//         fromInput.addEventListener('input', () => {
+//             model.setFrom(+fromInput.value)
+//             let {from, min, max} = model.getModel()
+//             view.changeThumbPosition(view.convertValueToPx(from))
+//
+//         })
+//
+//         const defPosition = (shiftX, event)=>{
+//             let {step} = model.getModel()
+//             let newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left
+//             let stepDiv = Math.round((max * newLeft / endSlider) / step)
+//             let thumbWidth = (stepDiv * step)
+//             return Math.round(thumbWidth / max * endSlider)
+//         }
+//
+//
+//         // thumbFrom.onpointerdown = (event) => {
+//         //     event.preventDefault()
+//         //     let shiftX = event.clientX - thumbFrom.getBoundingClientRect().left
+//         //     document.addEventListener('pointermove', onPointerMove);
+//         //     function onPointerMove(event) {
+//         //         let position = defPosition(shiftX,event)
+//         //         model.setFrom(position)
+//         //         view.changeThumbPosition(position, thumbFrom)
+//         //     }
+//         //     document.addEventListener('pointerup', () => {
+//         //         document.removeEventListener('pointermove', onPointerMove)
+//         //     })
+//         // }
+//
+//
+//         // thumbTo.onpointerdown = (event) => {
+//         //     event.preventDefault()
+//         //     let shiftX = event.clientX - thumbTo.getBoundingClientRect().left
+//         //     document.addEventListener('pointermove', onPointerMove);
+//         //     function onPointerMove(event) {
+//         //         let position = defPosition(shiftX,event)
+//         //         model.setTo(position)
+//         //         view.changeThumbPosition(position, thumbTo)
+//         //     }
+//         //     document.addEventListener('pointerup', () => {
+//         //         document.removeEventListener('pointermove', onPointerMove)
+//         //     })
+//         // }
+//     })
+//
+//
+// }
+
+
+
 
 /***/ }),
 
@@ -219,98 +375,82 @@ function SliderController(model, view) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SliderModel": () => (/* binding */ SliderModel)
+/* harmony export */   "default": () => (/* binding */ SliderModel)
 /* harmony export */ });
-/* harmony import */ var _sliderObserver__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sliderObserver */ "./src/ts/sliderObserver.ts");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-
 var SliderModel = /*#__PURE__*/function () {
-  function SliderModel(step, position, colorBar, colorThumb, range, from, to, min, max) {
+  function SliderModel(options) {
     _classCallCheck(this, SliderModel);
 
-    _defineProperty(this, "changed", (0,_sliderObserver__WEBPACK_IMPORTED_MODULE_0__.MakeObserverSubject)());
-
-    this.step = step;
-    this.position = position;
-    this.colorBar = colorBar;
-    this.colorThumb = colorThumb;
-    this.range = range;
-    this.from = from;
-    this.to = to;
-    this.min = min;
-    this.max = max;
-    this.step = step || 1;
-    this.position = position || "gorizontal";
-    this.colorBar = colorBar || '#32a85c';
-    this.colorThumb = colorThumb || '#5032a8';
-    this.range = range || [1, 100];
-    this.min = min || 0;
-    this.max = max || 100;
-    this.from = from;
-    this.to = to;
+    this.options = options;
+    this.step = options['step'];
+    this.min = options['min'];
+    this.max = options['max'];
+    this.values = options['values'];
+    this.vertical = options['vertical'];
+    this.colorBar = options['colorBar'];
+    this.colorThumb = options['colorThumb'];
+    this.scale = options['scale'];
+    this.interval = options['interval'];
   }
 
   _createClass(SliderModel, [{
     key: "setStep",
     value: function setStep(step) {
-      var _this = this;
-
       this.step = step;
-      this.changed.notifyObservers(function () {
-        console.log(_this.step);
-      });
     }
   }, {
-    key: "setPosition",
-    value: function setPosition(position) {
-      this.position = position === "vertical" ? "vertical" : "gorizontal";
+    key: "setMin",
+    value: function setMin(min) {
+      this.min = min;
+    }
+  }, {
+    key: "setMax",
+    value: function setMax(max) {
+      this.max = max;
     }
   }, {
     key: "setColorBar",
     value: function setColorBar(color) {
-      var _this2 = this;
-
       this.colorBar = color;
-      this.changed.notifyObservers(function (o) {
-        o.progressBar.css('background', _this2.getModel().colorBar);
-      });
     }
   }, {
-    key: "setColorThumb",
-    value: function setColorThumb(color) {
-      var _this3 = this;
-
+    key: "setColorPointer",
+    value: function setColorPointer(color) {
       this.colorThumb = color;
-      this.changed.notifyObservers(function (o) {
-        o.thumb.css('background', _this3.getModel().colorThumb);
-      });
     }
   }, {
-    key: "getModel",
-    value: function getModel() {
-      return {
-        step: this.step,
-        position: this.position,
-        colorBar: this.colorBar,
-        colorThumb: this.colorThumb,
-        range: this.range,
-        from: this.from,
-        to: this.to,
-        min: this.min,
-        max: this.max
-      };
+    key: "setVertical",
+    value: function setVertical(value) {
+      this.vertical = value;
+    }
+  }, {
+    key: "setScale",
+    value: function setScale(value) {
+      this.scale = value;
+    }
+  }, {
+    key: "setOptions",
+    value: function setOptions(options) {
+      this.options = _objectSpread(_objectSpread({}, this.options), options);
     }
   }]);
 
   return SliderModel;
 }();
+
+
 
 /***/ }),
 
@@ -323,8 +463,66 @@ var SliderModel = /*#__PURE__*/function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Observer),
 /* harmony export */   "MakeObserverSubject": () => (/* binding */ MakeObserverSubject)
 /* harmony export */ });
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Observer = function Observer(model, controller) {
+  _classCallCheck(this, Observer);
+
+  this.model = model;
+  this.controller = controller;
+  this.proxyModel = new Proxy(model, {
+    set: function set(target, p, value, receiver) {
+      switch (p) {
+        case "step":
+          target.setStep(value);
+          return;
+
+        case "min":
+          target.setMin(value);
+          return;
+
+        case "max":
+          target.setMax(value);
+          return;
+
+        case "colorBar":
+          target.setColorBar(value);
+          controller.changeColorBar(value);
+          return;
+
+        case "colorThumb":
+          target.setColorPointer(value);
+          controller.changeColorPointer(value);
+          return;
+
+        case "vertical":
+          console.log("VERTICAL", value);
+
+          if (!target['vertical'] === value) {
+            target.setVertical(value);
+            controller.updateSlider();
+          }
+
+          return;
+
+        case "scale":
+          if (!target['scale'] === value) {
+            target.setScale(value);
+            console.log(_typeof(target.scale), target.scale);
+            controller.updateSlider();
+          }
+
+      }
+    }
+  });
+};
+
+
 function MakeObserverSubject() {
   var observers = [];
 
@@ -367,49 +565,174 @@ function MakeObserverSubject() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "SliderView": () => (/* binding */ SliderView)
+/* harmony export */   "default": () => (/* binding */ View)
 /* harmony export */ });
 /* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-function SliderView(model, rootEl) {
-  var _this = this;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  model.changed.addObserver(this);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  var _model$getModel = model.getModel(),
-      min = _model$getModel.min,
-      max = _model$getModel.max,
-      step = _model$getModel.step,
-      position = _model$getModel.position;
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-  this.slider = $('<div class="range-slider"><div/>').appendTo(rootEl);
-  this.thumb = $('<div class="range-slider-thumb"><div/>').appendTo(this.slider);
-  this.thumb.css('color', "white");
-  this.thumb.css('textAlign', 'center');
-  this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider);
-  this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-  for (var i = 0; i <= 20; i++) {
-    if (i === 0 || i % 5 === 0) {
-      this.scaleValue = $('<div class="range-slider-scale-item_text"><div/>').appendTo(this.scale);
-    } else {
-      this.scaleValue = $('<div class="range-slider-scale-item_small"><div/>').appendTo(this.scale);
-    }
+var View = /*#__PURE__*/function () {
+  function View(model, root) {
+    _classCallCheck(this, View);
+
+    _defineProperty(this, "viewState", {});
+
+    this.model = model;
+    this.root = root;
   }
 
-  var textValue = document.querySelectorAll('.range-slider-scale-item_text');
-  var counter = 0;
+  _createClass(View, [{
+    key: "renderSlider",
+    value: function renderSlider() {
+      var _this = this;
 
-  for (var value = min; value <= max; value++) {
-    if (value === min || value / (Math.abs(min) + max) * 100 % 25 === 0) {
-      textValue[counter].innerText = value;
-      counter++;
+      if (this.model.vertical) {
+        this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(this.root);
+      } else {
+        this.slider = $('<div class="range-slider"><div/>').appendTo(this.root);
+      }
+
+      if (this.model.interval) {
+        console.log("is Interval SLIDER!!!");
+      } else {
+        this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider);
+        this.pointer.css('background', this.model.colorThumb);
+      }
+
+      this.sliderValue = $('<div class="range-slider-value"><div/>').appendTo(this.slider);
+      this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider);
+      this.progressBar.css('background', this.model.colorBar);
+
+      if (this.model.scale) {
+        this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider);
+        this.renderScale();
+      }
+
+      this.slider.ready(function () {
+        if (_this.viewState["vertical"]) {
+          _this.sliderEdge = _this.slider[0].offsetHeight - _this.pointer[0].offsetHeight;
+        } else {
+          _this.sliderEdge = _this.slider[0].offsetWidth - _this.pointer[0].offsetWidth;
+        }
+      });
     }
-  }
+  }, {
+    key: "renderScale",
+    value: function renderScale() {
+      var tmp = 0;
+      var scaleValue = $('<div class="scale-value"><div/>');
+      var count = 4;
+      var step = Math.abs(this.model.max - this.model.min) / count;
 
-  this.subscribe = function (func) {
-    func(_this);
-  };
-}
+      if (this.model.vertical) {
+        for (var i = this.model.max; i >= this.model.min; i -= step) {
+          $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').css('top', tmp + "%");
+          tmp += 25;
+        }
+      } else {
+        console.log(214);
+
+        for (var _i = this.model.min; _i <= this.model.max; _i += step) {
+          $('<div class="scale-value"><div/>').appendTo(this.scale).html(_i).css('position', 'absolute').css('left', tmp + "%");
+          tmp += 25;
+        }
+      }
+    }
+  }, {
+    key: "removeSlider",
+    value: function removeSlider() {
+      this.slider[0].remove();
+    }
+  }, {
+    key: "updateSlider",
+    value: function updateSlider() {
+      this.removeSlider();
+      this.renderSlider();
+    }
+  }]);
+
+  return View;
+}(); // export function SliderView(model, container) {
+//     this.slider = $('<div class="range-slider"><div/>').appendTo(container)
+//     this.thumbFrom = $('<div class="range-slider-thumb-lower"><div/>').appendTo(this.slider)
+//     this.thumbTo = $('<div class="range-slider-thumb-upper"><div/>').appendTo(this.slider)
+//     let endSlider;
+//     this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider)
+//     this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider)
+//
+//     this.slider.ready(
+//         () => {
+//             endSlider = this.slider.outerWidth() - this.thumbFrom.outerWidth()
+//             for (let i = 0; i <= 20; i++) {
+//                 if (i === 0 || i % 5 === 0) {
+//                     this.scaleValue = $('<div class="range-slider-scale-item_text"><div/>').appendTo(this.scale)
+//                 } else {
+//                     this.scaleValue = $('<div class="range-slider-scale-item_small"><div/>').appendTo(this.scale)
+//                 }
+//             }
+//             let textValue: NodeListOf<HTMLElement> = document.querySelectorAll('.range-slider-scale-item_text')
+//             let counter = 0;
+//             this.renderScale = () => {
+//                 let {min, max} = model.getModel()
+//                 console.log()
+//
+//                 for (let value = min; value <= max; value++) {
+//                     if (value === min || (value / (Math.abs(min) + max)) * 100 % 25 === 0) {
+//                         textValue[counter].innerText = value
+//                         counter++
+//                     }
+//                 }
+//             }
+//             this.renderScale()
+//             this.subscribe = (func) => {
+//                 func(this)
+//             }
+//             this.changeThumbPosition = (px, el) => {
+//                 let {min, max} = model.getModel()
+//                 const rangeKeeper = (count: number, min: number = 0, max: number = endSlider) => {
+//                     if (count < min) {
+//                         return min
+//                     }
+//                     if (count > max) {
+//                         return max
+//                     }
+//                     return count
+//                 }
+//
+//                 let endSlider = this.slider.outerWidth() - this.thumbFrom.outerWidth()
+//                 let position = Math.round(rangeKeeper(px)) / endSlider * 100
+//                 el.style.left = position + '%'
+//
+//
+//                 // this.thumbFrom.css('left', position+ "%")
+//                 // this.thumbFrom.css('left', rangeKeeper(px) + "px")
+//
+//                 el.innerHtml = rangeKeeper(Math.round(min + (max - min) * (px / endSlider)), min, max)
+//                 let fromPos = this.thumbFrom[0].getBoundingClientRect().left - this.slider[0].getBoundingClientRect().left
+//                 let toPos = this.thumbTo[0].getBoundingClientRect().left - this.slider[0].getBoundingClientRect().left
+//
+//                 this.progressBar.css('width', (toPos - fromPos) / endSlider * 100 + "%")
+//                 this.progressBar.css('left', fromPos / endSlider * 100 + '%')
+//             }
+//             this.convertValueToPx = (value) => {
+//                 const {min, max} = model.getModel()
+//                 return value * endSlider / (min + max)
+//             }
+//
+//             this.changeThumbPosition(this.convertValueToPx(model.getModel().from), this.thumbFrom[0])
+//             this.changeThumbPosition(this.convertValueToPx(model.getModel().to), this.thumbTo[0])
+//
+//         }
+//     )
+// }
+
+
+
 
 /***/ }),
 
@@ -11383,26 +11706,20 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _scss_index_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./scss/index.scss */ "./src/scss/index.scss");
-/* harmony import */ var _ts_sliderModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ts/sliderModel */ "./src/ts/sliderModel.ts");
-/* harmony import */ var _ts_view__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ts/view */ "./src/ts/view.ts");
-/* harmony import */ var _ts_SliderViewVertical__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./ts/SliderViewVertical */ "./src/ts/SliderViewVertical.ts");
-/* harmony import */ var _ts_interface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./ts/interface */ "./src/ts/interface.ts");
-/* harmony import */ var _ts_SliderControllerVertical__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./ts/SliderControllerVertical */ "./src/ts/SliderControllerVertical.ts");
+/* harmony import */ var _ts_App__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ts/App */ "./src/ts/App.ts");
 /* provided dependency */ var jQuery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-
-
-
-
+/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 
 
 
 (function ($) {
-  var model = new _ts_sliderModel__WEBPACK_IMPORTED_MODULE_1__.SliderModel();
-  model.setPosition("vertical");
-  var options = model.getModel();
-  var view = options.position === "gorizontal" ? new _ts_view__WEBPACK_IMPORTED_MODULE_2__.SliderView(model, $('<div class="slider-container"><div/>').appendTo($("body"))) : new _ts_SliderViewVertical__WEBPACK_IMPORTED_MODULE_3__.SliderViewVertical(model, $('<div class="slider-container"><div/>').appendTo($("body")));
-  var controller = options.position === "gorizontal" ? new _ts_interface__WEBPACK_IMPORTED_MODULE_4__.SliderController(model, view) : new _ts_SliderControllerVertical__WEBPACK_IMPORTED_MODULE_5__.SliderControllerVertical(model, view);
+  $.fn.rangeSlider = function () {
+    var slider = new _ts_App__WEBPACK_IMPORTED_MODULE_1__.default();
+    slider.init();
+  };
 })(jQuery);
+
+$('div').rangeSlider();
 })();
 
 /******/ })()

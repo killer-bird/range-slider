@@ -1,88 +1,141 @@
 export default class View {
     public slider
     public sliderValue
-    public viewState: {} = {}
     public pointer
-    public thumbTo
     public progressBar
     public scale
     public sliderEdge
 
     constructor(public model, public root: JQuery) {
-        this.viewState['min'] = model.getOptions().min
-        this.viewState['max'] = model.getOptions().max
-        this.viewState['scale'] = model.getOptions().scale
-        this.viewState['colorBar'] = model.getOptions().colorBar
-        this.viewState['colorThumb'] = model.getOptions().colorThumb
-        this.viewState['vertical'] = model.getOptions().vertical
-        this.viewState['values'] = model.getOptions.values
-        this.renderSlider()
-        this.slider.ready(()=>{
-            if(this.viewState["vertical"]){
-                this.sliderEdge = this.slider[0].offsetHeight - this.pointer[0].offsetHeight
-            }else {
-                this.sliderEdge = this.slider[0].offsetWidth - this.pointer[0].offsetWidth
+    }
 
-            }
-        })
+    convertValToPx(val) {
+        return this.sliderEdge * (val / (this.model.max - this.model.min) * 100) / 100 - this.model.min
+    }
 
+    getPercentage(pos) {
+        return pos / this.sliderEdge * 100
     }
 
     renderSlider() {
-        if(this.viewState["vertical"]){
+        if (this.model.vertical) {
             this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(this.root)
-        }else {
+            this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider)
+        } else {
             this.slider = $('<div class="range-slider"><div/>').appendTo(this.root)
+            this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider)
         }
-        this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider)
+        if (this.model.interval) {
+            this.pointer = $('<div class="range-slider-pointer"><div/>')
+                .add($('<div class="range-slider-pointer"><div/>'))
+                .css('background', this.model.colorThumb).appendTo(this.slider)
+            console.log(this.pointer[0], 0, this.pointer[1])
+        } else {
+            this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider)
+
+            this.pointer.css('background', this.model.colorThumb)
+        }
+
         this.sliderValue = $('<div class="range-slider-value"><div/>').appendTo(this.slider)
-        // this.thumbTo = $('<div class="range-slider-thumb-upper"><div/>').appendTo(this.slider)
-        this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider)
-        if (this.viewState['scale']) {
+
+        this.progressBar.css('background', this.model.colorBar)
+        if (this.model.scale) {
             this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider)
             this.renderScale()
         }
+        this.slider.ready(() => {
+
+            if (this.model.vertical) {
+                this.sliderEdge = this.slider[0].offsetHeight - this.pointer[0].offsetHeight
+            } else {
+                this.sliderEdge = this.slider[0].offsetWidth - this.pointer[0].offsetWidth
+            }
+            if (this.model.interval) {
+                this.movePointer(this.pointer[0], this.convertValToPx(this.model.from),
+                    this.getPercentage(this.convertValToPx(this.model.from)))
+                this.movePointer(this.pointer[1], this.convertValToPx(this.model.to),
+                    this.getPercentage(this.convertValToPx(this.model.from)))
+            } else {
+                this.movePointer(this.pointer[0], this.convertValToPx(this.model.from),
+                    this.getPercentage(this.convertValToPx(this.model.from)))
+            }
+        })
     }
 
     renderScale() {
         let tmp = 0;
         const scaleValue = $('<div class="scale-value"><div/>')
         let count = 4;
-        let step = Math.abs(this.viewState['max'] - this.viewState['min'])/count
-        if(this.viewState["vertical"]){
-            for (let i = this.viewState['max']; i >= this.viewState['min']; i-=step) {
-                $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').
-                css('top', tmp + "%")
+        let step = Math.round(Math.abs(this.model.max - this.model.min) / count)
+        // for (let i = 0; i < count; i++) {
+        //     let min = this.model.min;
+        //     console.log(min)
+        //     min += step
+        // }
+        if (this.model.vertical) {
+            for (let i = this.model.max; i >= this.model.min; i -= step) {
+                $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').css('top', tmp + "%")
                 tmp += 25;
             }
-        }
-        else {
-            for (let i = this.viewState['min']; i <= this.viewState['max']; i+=step) {
-                $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').
-                css('left', tmp + "%")
+        } else {
+            for (let i = this.model.min; i <= this.model.max; i += step) {
+                $('<div class="scale-value"><div/>').appendTo(this.scale).css('position', 'absolute').css('left', tmp + "%")
                 tmp += 25;
             }
         }
     }
-    changeThumbPosition(px, el) {
-        const rangeKeeper = (count: number, min: number = 0, max: number = this.sliderEdge  ) => {
-            if (count < min) {
+
+    removeSlider() {
+        this.slider[0].remove()
+    }
+
+    updateSlider() {
+        this.removeSlider()
+        this.renderSlider()
+    }
+
+    movePointer(el, position: number, percentage: number) {
+        const pointerKeeper = (pos: number, min: number = 0, max: number = this.sliderEdge) => {
+            if (pos < min) {
                 return min
             }
-            if (count > max) {
-
+            if (pos > max) {
                 return max
             }
-            return count
+            return pos
         }
+        if (this.model.vertical) {
+            el.style.bottom = position + 'px';
+            this.sliderValue[0].style.bottom = position + 'px';
+            if (this.model.interval) {
+                this.progressBar[0].style.bottom = this.pointer[0].style.bottom
+                let widthOfInterval = parseInt(this.pointer[1].style.bottom) - parseInt(this.pointer[0].style.bottom)
+                this.progressBar[0].style.height = widthOfInterval / this.sliderEdge * 100 + "%"
+            } else {
+                el.style.bottom = position + 'px';
+                this.sliderValue[0].style.bottom = position + 'px';
+                this.progressBar[0].style.height = percentage + '%'
+            }
 
-        let position = Math.round(rangeKeeper(px))
-        console.log(this.sliderEdge)
-        el[0].style.left = position + 'px'
-        this.progressBar[0].style.width = position  + 'px'
+        } else {
+            el.style.left = position + 'px';
+            this.sliderValue[0].style.left = position + 'px';
+            if (this.model.interval) {
+                this.progressBar[0].style.left = this.pointer[0].style.left
+                let widthOfInterval = parseInt(this.pointer[1].style.left) - parseInt(this.pointer[0].style.left)
+                this.progressBar[0].style.width = widthOfInterval / this.sliderEdge * 100 + "%"
+
+            } else {
+                this.progressBar[0].style.width = percentage + '%'
+            }
+
+        }
+        let value = Math.abs(this.model.min - this.model.max) * Math.round(position / this.sliderEdge * 100) / 100 + this.model.min
+        console.log(position)
+        this.sliderValue[0].innerText = value
+
     }
 }
-
 
 // export function SliderView(model, container) {
 //     this.slider = $('<div class="range-slider"><div/>').appendTo(container)

@@ -5,12 +5,13 @@ import App from "./ts/App";
 
 (function ($) {
 
-    $.fn.rangeSlider = function () {
-        const slider = new App()
-        slider.init()
+    $.fn.rangeSlider = function (options?) {
+        const slider = new App(options)
     }
 
 }(jQuery));
 
-$('div').rangeSlider()
+$('div').rangeSlider( )
+
+
 

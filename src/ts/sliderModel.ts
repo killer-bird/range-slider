@@ -1,74 +1,70 @@
-export class SliderModel{
+import {ModelOptions} from "./interfases";
 
-    public step:number
-    public min :number
-    public max:number
-    public from :number
-    public to :number
+export default class SliderModel implements ModelOptions {
 
-    constructor(public options:object) {
+    public step
+    public min
+    public max
+    public vertical
+    public from
+    public to
+    public colorBar
+    public colorThumb
+    public scale
+    public interval
+
+
+    constructor(public options?: object) {
         this.step = options['step']
         this.min = options['min']
         this.max = options['max']
-        this.from = options['values'][0]
-        this.to = options['values'][1]
+        this.from = options['from']
+        this.to = options['to']
+        this.vertical = options['vertical']
+        this.colorBar = options['colorBar']
+        this.colorThumb = options['colorThumb']
+        this.scale = options['scale']
+        this.interval = options['interval']
 
     }
 
-
-
-
-    public setOptions(options:object){
-        this.options = {...this.options, ...options}
+    setStep(step) {
+        this.step = step
     }
 
-    setStep(step: number): void {
-        this.step = step;
-    }
-    setPosition(position: string): void {
-
-    }
-
-    setFrom(from:number):void{
-        this.from = from
-    }
-    setTo(to:number):void{
-        this.to = to
-    }
-    setMin(min:number):void{
+    setMin(min) {
         this.min = min
     }
-    setMax(max:number):void{
+
+    setMax(max) {
         this.max = max
     }
-    setColorBar(color: string): void {
-        this.colorBar = color;
-        this.changed.notifyObservers((o) => {
-            o.progressBar.css('background', this.getModel().colorBar)
-        })
-    }
-    setColorThumb(color: string): void {
-        this.colorThumb = color;
-        this.changed.notifyObservers((o) => {
-            o.thumb.css('background', this.getModel().colorThumb)
-        })
-    }
-    getOptions(){
-        return this.options
+
+    setColorBar(color) {
+        this.colorBar = color
     }
 
-    getModel() {
-        return {
-            step: this.step,
-            position: this.position,
-            colorBar: this.colorBar,
-            colorThumb: this.colorThumb,
-            start: this.start,
-            from: this.from,
-            to: this.to,
-            min: this.min,
-            max: this.max
+    setColorPointer(color) {
+        this.colorThumb = color
+    }
 
-        }
+    setVertical(value) {
+        this.vertical = value
+    }
+
+    setScale(value) {
+        this.scale = value
+    }
+
+    setFrom(from) {
+        this.from = from
+    }
+
+    setTo(to) {
+        this.to = to
+    }
+
+    setInterval(interval) {
+        this.interval = interval
     }
 }
