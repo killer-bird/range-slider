@@ -51,13 +51,10 @@ export default class View {
                 this.sliderEdge = this.slider[0].offsetWidth - this.pointer[0].offsetWidth
             }
             if (this.model.interval) {
-                this.movePointer(this.pointer[0], this.convertValToPx(this.model.from),
-                    this.getPercentage(this.convertValToPx(this.model.from)))
-                this.movePointer(this.pointer[1], this.convertValToPx(this.model.to),
-                    this.getPercentage(this.convertValToPx(this.model.from)))
+                this.movePointer(this.pointer[0], this.convertValToPx(this.model.from))
+                this.movePointer(this.pointer[1], this.convertValToPx(this.model.to))
             } else {
-                this.movePointer(this.pointer[0], this.convertValToPx(this.model.from),
-                    this.getPercentage(this.convertValToPx(this.model.from)))
+                this.movePointer(this.pointer[0], this.convertValToPx(this.model.from))
             }
         })
     }
@@ -79,7 +76,7 @@ export default class View {
             }
         } else {
             for (let i = this.model.min; i <= this.model.max; i += step) {
-                $('<div class="scale-value"><div/>').appendTo(this.scale).css('position', 'absolute').css('left', tmp + "%")
+                $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').css('left', tmp + "%")
                 tmp += 25;
             }
         }
@@ -94,16 +91,7 @@ export default class View {
         this.renderSlider()
     }
 
-    movePointer(el, position: number, percentage: number) {
-        const pointerKeeper = (pos: number, min: number = 0, max: number = this.sliderEdge) => {
-            if (pos < min) {
-                return min
-            }
-            if (pos > max) {
-                return max
-            }
-            return pos
-        }
+    movePointer(el, position: number) {
         if (this.model.vertical) {
             el.style.bottom = position + 'px';
             this.sliderValue[0].style.bottom = position + 'px';
@@ -114,7 +102,7 @@ export default class View {
             } else {
                 el.style.bottom = position + 'px';
                 this.sliderValue[0].style.bottom = position + 'px';
-                this.progressBar[0].style.height = percentage + '%'
+                this.progressBar[0].style.height = this.getPercentage(position) + '%'
             }
 
         } else {
@@ -126,13 +114,11 @@ export default class View {
                 this.progressBar[0].style.width = widthOfInterval / this.sliderEdge * 100 + "%"
 
             } else {
-                this.progressBar[0].style.width = percentage + '%'
+                this.progressBar[0].style.width = this.getPercentage(position) + '%'
             }
 
         }
-        let value = Math.abs(this.model.min - this.model.max) * Math.round(position / this.sliderEdge * 100) / 100 + this.model.min
-        console.log(position)
-        this.sliderValue[0].innerText = value
+        this.sliderValue[0].innerText = Math.abs(this.model.min - this.model.max) * Math.round(position / this.sliderEdge * 100) / 100 + this.model.min
 
     }
 }

@@ -1,7 +1,7 @@
 import {ModelOptions} from "./interfases";
 
 export const defaultSettings: ModelOptions = {
-    step: 1,
+    step: 100,
     min:  -100,
     max: 200,
     from: 20,
