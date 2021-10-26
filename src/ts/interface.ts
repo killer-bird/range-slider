@@ -92,8 +92,8 @@ export default class Controller {
                 }
 
 
-                let sliderThumbX = 50
-                let sliderWidth = 100
+                let sliderThumbX = newLeft
+                let sliderWidth = this.view.sliderEdge
 
                 let minValue = -100
                 let maxValue = 200
