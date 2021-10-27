@@ -45,6 +45,8 @@ export default class Controller {
             e.preventDefault()
             let shiftX = e.offsetX
             let shiftY = e.offsetY
+            shiftX = shiftX * 0.5
+            shiftY = shiftY * 0.5
             const pointers = [this.view.pointer[0], this.view.pointer[1]]
             const closetsPointer = (curr) => {
                 return pointers.reduce((previousValue, currentValue) => {
@@ -91,9 +93,8 @@ export default class Controller {
                     newLeft = e.clientX - shiftX - this.view.slider[0].getBoundingClientRect().left
                 }
 
-
                 let sliderThumbX = newLeft
-                let sliderWidth = this.view.sliderEdge
+                let sliderWidth = this.view.slider[0].offsetWidth
 
                 let minValue = -100
                 let maxValue = 200
@@ -114,37 +115,38 @@ export default class Controller {
 
                 let value = nearestStep * step + minValue
 
+                let testPos = nearestStep / stepsCount * 100
+
 
                 console.log("thumbPosition", thumbPosition)
                 console.log("stepsCount", stepsCount)
                 console.log("value", value)
 
-
                 stepDiv = Math.round(max * newLeft / this.view.sliderEdge / step)
                 thumbWidth = (stepDiv * step)
                 position = thumbWidth / max * this.view.sliderEdge
-                position = value
+                position = testPos
                 if (this.model.interval) {
                     if (currentPointer === pointers[0]) {
                         let rightEdge
-                        if(this.model.vertical){
-                            rightEdge =  parseInt(pointers[1].style.bottom) - pointers[1].offsetHeight
-                        }else {
-                            rightEdge =  parseInt(pointers[1].style.left) - pointers[1].offsetWidth
+                        if (this.model.vertical) {
+                            rightEdge = parseInt(pointers[1].style.bottom) - pointers[1].offsetHeight
+                        } else {
+                            rightEdge = parseInt(pointers[1].style.left) - pointers[1].offsetWidth
                         }
                         this.view.movePointer(currentPointer, pointerKeeper(position, 0, rightEdge + 1))
                     }
                     if (currentPointer === pointers[1]) {
                         let leftEdge
-                        if(this.model.vertical) {
+                        if (this.model.vertical) {
                             leftEdge = parseInt(pointers[0].style.bottom) + pointers[0].offsetHeight - 0.5
-                        }else {
+                        } else {
                             leftEdge = parseInt(pointers[0].style.left) + pointers[0].offsetWidth - 0.5
                         }
                         this.view.movePointer(currentPointer, pointerKeeper(position, leftEdge), this.view.getPercentage(position))
                     }
                 } else {
-                    this.view.movePointer(currentPointer, pointerKeeper(position), this.view.getPercentage(position))
+                    this.view.movePointer(currentPointer, pointerKeeper(position, 0, 100), this.view.getPercentage(position))
                 }
 
 

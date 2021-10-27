@@ -106,7 +106,7 @@ export default class View {
             }
 
         } else {
-            el.style.left = position + 'px';
+            el.style.left = position + '%';
             this.sliderValue[0].style.left = position + 'px';
             if (this.model.interval) {
                 this.progressBar[0].style.left = this.pointer[0].style.left
