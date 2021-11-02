@@ -1,7 +1,7 @@
 import {ModelOptions} from "./interfases";
 
 export const defaultSettings: ModelOptions = {
-    step: 100,
+    step: 1,
     min:  -100,
     max: 200,
     from: 20,
@@ -10,5 +10,5 @@ export const defaultSettings: ModelOptions = {
     colorBar: '#32a85c',
     colorThumb: '#5032a8',
     scale: true,
-    interval: false
+    interval: true
 }

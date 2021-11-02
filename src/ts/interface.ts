@@ -3,6 +3,7 @@ export default class Controller {
     public view
     public sliderEdge: number
     public slider
+    public pointers
 
     constructor(model, view) {
         this.model = model
@@ -20,160 +21,158 @@ export default class Controller {
 
     updateSlider() {
         this.view.updateSlider()
+        this.setDefaultValues()
         this.handlePointerEvent()
+        this.handleScaleClicks()
+        this.pointers = [this.view.pointer[0], this.view.pointer[1]]
     }
 
     renderView() {
         this.view.renderSlider()
+        this.setDefaultValues()
         this.handlePointerEvent()
+        this.handleScaleClicks()
+        this.pointers = [this.view.pointer[0], this.view.pointer[1]]
     }
 
-    convertValToPx(val) {
-        return this.view.sliderEdge * (val / (this.model.max - this.model.min) * 100) / 100 - this.model.min
-    }
-
-    movePointer(el, pos, perc) {
-        this.view.movePointer(el, pos, perc)
+    movePointer(el, pos, value) {
+        this.view.movePointer(el, pos, value)
     }
 
     getPercentage(pos) {
-        return pos / this.view.sliderEdge * 100
+        return pos / this.view.sliderEdge
+    }
+
+    getNearestStep(pos) {
+        let minMaxLength = Math.abs(this.model.min - this.model.max)
+        let stepsCount = minMaxLength / this.model.step
+        return Math.ceil(stepsCount * pos)
+    }
+
+    getPosition(nearestStep) {
+        let minMaxLength = Math.abs(this.model.min - this.model.max)
+        let stepsCount = minMaxLength / this.model.step
+        return nearestStep / stepsCount * this.view.sliderEdge
+    }
+
+    getValue(nearestStep) {
+        console.log(nearestStep)
+        return nearestStep * this.model.step + this.model.min
+    }
+
+    convertPixelsToValue(px) {
+        const pxFraction = px / this.view.sliderEdge
+        return Math.round(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min)
+    }
+
+    convertValueToPixels(val: number) {
+        if (typeof val !== 'number') {
+            val = parseInt(val)
+        }
+        let pos = val + (this.model.min * -1)
+        return pos / Math.abs(this.model.min - this.model.max) * this.view.sliderEdge
+    }
+
+    closetsPointer = (curr) => {
+        return this.pointers.reduce((previousValue, currentValue) => {
+            if (this.model.vertical) {
+                if (currentValue) {
+                    return Math.abs(parseInt(currentValue.style.bottom) - curr) < Math.abs(parseInt(previousValue.style.bottom) - curr) ?
+                        currentValue : previousValue
+                } else {
+                    return this.pointers[0]
+                }
+            } else {
+                if (currentValue) {
+                    return Math.abs(parseInt(currentValue.style.left) - curr) < Math.abs(parseInt(previousValue.style.left) - curr) ?
+                        currentValue : previousValue
+                } else {
+                    return this.pointers[0]
+                }
+            }
+        })
+    }
+
+    setDefaultValues() {
+        this.view.slider.ready(() => {
+            if (this.model.interval) {
+                this.movePointer(this.view.pointer[0], this.convertValueToPixels(this.model.from), this.model.from)
+                this.movePointer(this.view.pointer[1], this.convertValueToPixels(this.model.to), this.model.to)
+            } else {
+                this.movePointer(this.view.pointer[0], this.convertValueToPixels(this.model.from), this.model.from)
+            }
+        })
+
+    }
+
+    handleScaleClicks() {
+        console.log(this.view.scaleValue)
+        $.each(this.view.scaleValue, (i, value) => {
+            value.addEventListener('pointerdown', () => {
+                let pos = this.convertValueToPixels(value.innerHTML)
+                console.log(pos)
+                this.movePointer(this.closetsPointer(pos), pos, value.innerHTML)
+            })
+        })
+
     }
 
     handlePointerEvent = () => {
         this.view.slider[0].onpointerdown = (e) => {
             e.preventDefault()
-            let shiftX = e.offsetX
-            let shiftY = e.offsetY
-            shiftX = shiftX * 0.5
-            shiftY = shiftY * 0.5
-            const pointers = [this.view.pointer[0], this.view.pointer[1]]
-            const closetsPointer = (curr) => {
-                return pointers.reduce((previousValue, currentValue) => {
-                    if (this.model.vertical) {
-                        if (currentValue) {
-                            return Math.abs(parseInt(currentValue.style.bottom) - curr) < Math.abs(parseInt(previousValue.style.bottom) - curr) ?
-                                currentValue : previousValue
-                        } else {
-                            return pointers[0]
-                        }
-                    } else {
-                        if (currentValue) {
-                            return Math.abs(parseInt(currentValue.style.left) - curr) < Math.abs(parseInt(previousValue.style.left) - curr) ?
-                                currentValue : previousValue
-                        } else {
-                            return pointers[0]
-                        }
-                    }
-                })
-            }
-            let currentPointer;
+            let currentPointer = this.view.pointer[0];
+            let minMaxLength = Math.abs(this.model.min - this.model.min)
             if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
                 let curr = (e.clientX - this.view.slider[0].getBoundingClientRect().left - this.view.pointer[0].offsetWidth * 0.5)
-                this.view.movePointer(closetsPointer(curr), curr, this.getPercentage(curr))
+                console.log(this.model.max - this.model.min, minMaxLength)
+                this.movePointer(this.closetsPointer(curr), curr, Math.round(Math.abs(this.model.min - this.model.max) * (curr / this.view.sliderEdge) + this.model.min))
             }
             if (e.target.classList.contains("range-slider_vertical") || e.target.classList.contains("range-slider-progress_vertical")) {
                 let curr = (this.view.slider[0].getBoundingClientRect().bottom - e.clientY - this.view.pointer[0].offsetWidth * 0.5)
-                this.view.movePointer(closetsPointer(curr), curr, this.getPercentage(curr))
+                this.view.movePointer(this.closetsPointer(curr), curr, this.getPercentage(curr))
             }
             if (e.target.classList.contains("range-slider-pointer")) {
                 currentPointer = e.target
 
             }
+
             const onPointerMove = (e) => {
-                let {step, min, max} = this.model
-                let newLeft,
-                    stepDiv,
-                    thumbWidth,
-                    position
+                let sliderThumbX, sliderLen
 
                 if (this.model.vertical) {
-                    newLeft = this.view.slider[0].offsetHeight - e.clientY - shiftY + this.view.slider[0].getBoundingClientRect().top
+                    sliderThumbX = this.view.slider[0].offsetHeight - e.clientY + this.view.slider[0].getBoundingClientRect().top
+
                 } else {
-                    newLeft = e.clientX - shiftX - this.view.slider[0].getBoundingClientRect().left
+                    sliderThumbX = e.clientX - this.view.slider[0].getBoundingClientRect().left - this.view.pointer[0].offsetWidth * 0.5
                 }
+                let thumbPosition = pointerKeeper(sliderThumbX / this.view.sliderEdge, 0, 1)
+                let nearestStep = this.getNearestStep(thumbPosition)
+                let value = this.getValue(nearestStep)
+                let position = this.getPosition(nearestStep)
 
-                let sliderThumbX = newLeft
-                let sliderWidth = this.view.slider[0].offsetWidth
-
-                let minValue = -100
-                let maxValue = 200
-
-
-
-////////////////////
-
-                let thumbPosition = sliderThumbX / sliderWidth
-
-                let minMaxLength = Math.abs(minValue-maxValue)
-
-                let stepsCount = minMaxLength / step
-
-                let nearestStep = Math.floor(stepsCount * thumbPosition)
-
-                console.log(nearestStep)
-
-                let value = nearestStep * step + minValue
-
-                let testPos = nearestStep / stepsCount * 100
-
-
-                console.log("thumbPosition", thumbPosition)
-                console.log("stepsCount", stepsCount)
-                console.log("value", value)
-
-                stepDiv = Math.round(max * newLeft / this.view.sliderEdge / step)
-                thumbWidth = (stepDiv * step)
-                position = thumbWidth / max * this.view.sliderEdge
-                position = testPos
                 if (this.model.interval) {
-                    if (currentPointer === pointers[0]) {
+                    if (currentPointer === this.pointers[0]) {
                         let rightEdge
                         if (this.model.vertical) {
-                            rightEdge = parseInt(pointers[1].style.bottom) - pointers[1].offsetHeight
+                            rightEdge = parseInt(this.pointers[1].style.bottom) - this.pointers[1].offsetHeight
                         } else {
-                            rightEdge = parseInt(pointers[1].style.left) - pointers[1].offsetWidth
+                            rightEdge = parseInt(this.pointers[1].style.left) - this.pointers[1].offsetWidth
                         }
-                        this.view.movePointer(currentPointer, pointerKeeper(position, 0, rightEdge + 1))
+                        this.view.movePointer(currentPointer, pointerKeeper(position, 0, rightEdge), value)
                     }
-                    if (currentPointer === pointers[1]) {
+                    if (currentPointer === this.pointers[1]) {
                         let leftEdge
                         if (this.model.vertical) {
-                            leftEdge = parseInt(pointers[0].style.bottom) + pointers[0].offsetHeight - 0.5
+                            leftEdge = parseInt(this.pointers[0].style.bottom) + this.pointers[0].offsetHeight - 0.5
                         } else {
-                            leftEdge = parseInt(pointers[0].style.left) + pointers[0].offsetWidth - 0.5
+                            leftEdge = parseInt(this.pointers[0].style.left) + this.pointers[0].offsetWidth - 0.5
                         }
-                        this.view.movePointer(currentPointer, pointerKeeper(position, leftEdge), this.view.getPercentage(position))
+                        this.view.movePointer(currentPointer, pointerKeeper(position, leftEdge), value)
                     }
                 } else {
-                    this.view.movePointer(currentPointer, pointerKeeper(position, 0, 100), this.view.getPercentage(position))
+                    console.log(currentPointer, pointerKeeper(position), pointerKeeper(value, this.model.min, this.model.max))
+                    this.view.movePointer(currentPointer, pointerKeeper(position), pointerKeeper(value, this.model.min, this.model.max))
                 }
-
-
-                // if(this.model.interval){
-                //     if (this.model.vertical){
-                //         this.movePointer(currentPointer, pointerKeeper(position,
-                //             parseInt(pointers[0].style.bottom) + pointers[0].offsetHeight, ),
-                //             this.view.getPercentage(position))
-                //
-                //         if(e.target === pointers[0]){
-                //             this.movePointer(e.target, pointerKeeper(position, 0, parseInt(pointers[1].style.bottom) - pointers[1].offsetHeight ), this.view.getPercentage(position))
-                //
-                //         }else {
-                //             this.movePointer(e.target, pointerKeeper(position, parseInt(pointers[0].style.bottom) + pointers[0].offsetHeight, ), this.view.getPercentage(position))
-                //         }
-                //     }else {
-                //         if(e.target === pointers[0]){
-                //             this.movePointer(e.target, pointerKeeper(position, 0, parseInt(pointers[1].style.left) - pointers[1].offsetWidth ), this.view.getPercentage(position))
-                //         }else {
-                //             console.log(parseInt(pointers[0].style.left) - pointers[0].offsetWidth)
-                //             this.movePointer(currentPointer, pointerKeeper(position, parseInt(pointers[0].style.left) + pointers[0].offsetWidth, ), this.view.getPercentage(position))
-                //         }
-                //     }
-                //
-                // }else {
-                //     this.movePointer(currentPointer, pointerKeeper(position), this.view.getPercentage(position))
-                // }
             }
 
             const onPointerUp = () => {
@@ -196,88 +195,3 @@ export default class Controller {
         }
     }
 }
-
-
-// export function SliderController(model, view) {
-//     $('body').ready( () => {
-//         let {min, max} = model.getModel()
-//         const thumbFrom: HTMLElement = document.querySelector('.range-slider-thumb-lower')
-//         const thumbTo :HTMLElement = document.querySelector('.range-slider-thumb-upper')
-//
-//         const rangeSlider: HTMLElement = document.querySelector('.range-slider')!;
-//
-//         const progressInput: HTMLInputElement = document.querySelector('.colorBar')
-//         const progressThumb: HTMLInputElement = document.querySelector('.colorThumb')
-//         const stepInput: HTMLInputElement = document.querySelector('.step')
-//         const minInput: HTMLInputElement = document.querySelector('.min')
-//         const maxInput: HTMLInputElement = document.querySelector('.max')
-//         const fromInput: HTMLInputElement = document.querySelector('.from')
-//         let endSlider = rangeSlider.offsetWidth - thumbFrom.offsetWidth
-//
-//
-//         progressInput.addEventListener('input', () => {
-//             model.setColorBar(progressInput.value)
-//         })
-//         progressThumb.addEventListener('input', () => {
-//             model.setColorThumb(progressThumb.value)
-//         })
-//         stepInput.addEventListener('input', () => {
-//             model.setStep(+stepInput.value)
-//             fromInput.setAttribute("step", stepInput.value)
-//         })
-//         minInput.addEventListener('change', () => {
-//             model.setMin(+minInput.value)
-//             view.renderScale()
-//         })
-//         maxInput.addEventListener('change', () => {
-//             model.setMax(+maxInput.value)
-//             view.renderScale()
-//         })
-//         fromInput.addEventListener('input', () => {
-//             model.setFrom(+fromInput.value)
-//             let {from, min, max} = model.getModel()
-//             view.changeThumbPosition(view.convertValueToPx(from))
-//
-//         })
-//
-//         const defPosition = (shiftX, event)=>{
-//             let {step} = model.getModel()
-//             let newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left
-//             let stepDiv = Math.round((max * newLeft / endSlider) / step)
-//             let thumbWidth = (stepDiv * step)
-//             return Math.round(thumbWidth / max * endSlider)
-//         }
-//
-//
-//         // thumbFrom.onpointerdown = (event) => {
-//         //     event.preventDefault()
-//         //     let shiftX = event.clientX - thumbFrom.getBoundingClientRect().left
-//         //     document.addEventListener('pointermove', onPointerMove);
-//         //     function onPointerMove(event) {
-//         //         let position = defPosition(shiftX,event)
-//         //         model.setFrom(position)
-//         //         view.changeThumbPosition(position, thumbFrom)
-//         //     }
-//         //     document.addEventListener('pointerup', () => {
-//         //         document.removeEventListener('pointermove', onPointerMove)
-//         //     })
-//         // }
-//
-//
-//         // thumbTo.onpointerdown = (event) => {
-//         //     event.preventDefault()
-//         //     let shiftX = event.clientX - thumbTo.getBoundingClientRect().left
-//         //     document.addEventListener('pointermove', onPointerMove);
-//         //     function onPointerMove(event) {
-//         //         let position = defPosition(shiftX,event)
-//         //         model.setTo(position)
-//         //         view.changeThumbPosition(position, thumbTo)
-//         //     }
-//         //     document.addEventListener('pointerup', () => {
-//         //         document.removeEventListener('pointermove', onPointerMove)
-//         //     })
-//         // }
-//     })
-//
-//
-// }

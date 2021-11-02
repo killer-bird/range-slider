@@ -11,13 +11,13 @@ export default class Observer {
                 switch (p) {
                     case "step":
                         target.setStep(value)
-                        return
+                        return true
                     case "min":
-                        target.setMin(value)
+                        target.setMin(parseInt(value))
                         controller.updateSlider()
-                        return
+                        return true
                     case "max":
-                        target.setMax(value)
+                        target.setMax(parseInt(value))
                         controller.updateSlider()
                         return
                     case "colorBar":
@@ -42,14 +42,15 @@ export default class Observer {
                         }
                         return
                     case "from":
-                        let posFrom = controller.convertValToPx(value)
-                        controller.movePointer(controller.view.pointer[0] ,posFrom, controller.getPercentage(posFrom))
+                        let posFrom = controller.convertValueToPixels(value)
+                        console.log(posFrom)
+                        controller.movePointer(controller.view.pointer[0], posFrom, value)
                         target.setFrom(value)
                         return
                     case "to":
-                        let posTo = controller.convertValToPx(value)
+                        let posTo = controller.convertValueToPixels(value)
                         console.log(posTo)
-                        controller.movePointer(controller.view.pointer[1] ,posTo, controller.getPercentage(posTo))
+                        controller.movePointer(controller.view.pointer[1], posTo, value)
                         target.setFrom(value)
                         return
                     case "interval":

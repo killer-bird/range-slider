@@ -18,6 +18,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./view */ "./src/ts/view.ts");
 /* harmony import */ var _interface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./interface */ "./src/ts/interface.ts");
 /* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -39,16 +45,21 @@ var stepInput = document.querySelector('.step');
 var minInput = document.querySelector('.min');
 var maxInput = document.querySelector('.max');
 var fromInput = document.querySelector('.from');
+var toInput = document.querySelector('.to');
+var intervalInput = document.querySelector('.interval');
 
 var App = /*#__PURE__*/function () {
-  function App() {
+  function App(options) {
     _classCallCheck(this, App);
+
+    this.options = options;
+    this.init();
   }
 
   _createClass(App, [{
     key: "init",
     value: function init() {
-      var model = new _sliderModel__WEBPACK_IMPORTED_MODULE_0__.default(this.options || _defaultModel__WEBPACK_IMPORTED_MODULE_1__.defaultSettings);
+      var model = new _sliderModel__WEBPACK_IMPORTED_MODULE_0__.default(_objectSpread(_objectSpread({}, _defaultModel__WEBPACK_IMPORTED_MODULE_1__.defaultSettings), this.options));
       var container = document.createElement('div');
       container.className = "slider-container";
       document.body.append(container);
@@ -69,6 +80,22 @@ var App = /*#__PURE__*/function () {
       });
       stepInput.addEventListener('change', function () {
         observer.proxyModel.step = stepInput.value;
+        fromInput.step = stepInput.value;
+      });
+      minInput.addEventListener('change', function () {
+        observer.proxyModel.min = minInput.value;
+      });
+      maxInput.addEventListener('change', function () {
+        observer.proxyModel.max = maxInput.value;
+      });
+      fromInput.addEventListener('input', function () {
+        observer.proxyModel.from = fromInput.value;
+      });
+      toInput.addEventListener('input', function () {
+        observer.proxyModel.to = toInput.value;
+      });
+      intervalInput.addEventListener('input', function () {
+        observer.proxyModel.interval = intervalInput.value === 'true';
       });
     }
   }]);
@@ -95,12 +122,13 @@ var defaultSettings = {
   step: 1,
   min: -100,
   max: 200,
-  values: [20, 60],
+  from: 20,
+  to: 60,
   vertical: false,
   colorBar: '#32a85c',
   colorThumb: '#5032a8',
   scale: true,
-  interval: false
+  interval: true
 };
 
 /***/ }),
@@ -116,6 +144,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Controller)
 /* harmony export */ });
+/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -130,79 +159,106 @@ var Controller = /*#__PURE__*/function () {
 
     _classCallCheck(this, Controller);
 
-    _defineProperty(this, "handlePointerEvent", function () {
-      console.log("handle events");
+    _defineProperty(this, "closetsPointer", function (curr) {
+      return _this.pointers.reduce(function (previousValue, currentValue) {
+        if (_this.model.vertical) {
+          if (currentValue) {
+            return Math.abs(parseInt(currentValue.style.bottom) - curr) < Math.abs(parseInt(previousValue.style.bottom) - curr) ? currentValue : previousValue;
+          } else {
+            return _this.pointers[0];
+          }
+        } else {
+          if (currentValue) {
+            return Math.abs(parseInt(currentValue.style.left) - curr) < Math.abs(parseInt(previousValue.style.left) - curr) ? currentValue : previousValue;
+          } else {
+            return _this.pointers[0];
+          }
+        }
+      });
+    });
 
+    _defineProperty(this, "handlePointerEvent", function () {
       _this.view.slider[0].onpointerdown = function (e) {
         e.preventDefault();
-        var shiftX = e.offsetX;
-        var shiftY = e.offsetY;
-        console.log(e.target.classList);
+        var currentPointer = _this.view.pointer[0];
+        var minMaxLength = Math.abs(_this.model.min - _this.model.min);
 
-        if (e.target.classList.contains("range-slider")) {
-          console.log("SLIDER");
+        if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
+          var curr = e.clientX - _this.view.slider[0].getBoundingClientRect().left - _this.view.pointer[0].offsetWidth * 0.5;
+          console.log(_this.model.max - _this.model.min, minMaxLength);
+
+          _this.movePointer(_this.closetsPointer(curr), curr, Math.round(Math.abs(_this.model.min - _this.model.max) * (curr / _this.view.sliderEdge) + _this.model.min));
+        }
+
+        if (e.target.classList.contains("range-slider_vertical") || e.target.classList.contains("range-slider-progress_vertical")) {
+          var _curr = _this.view.slider[0].getBoundingClientRect().bottom - e.clientY - _this.view.pointer[0].offsetWidth * 0.5;
+
+          _this.view.movePointer(_this.closetsPointer(_curr), _curr, _this.getPercentage(_curr));
         }
 
         if (e.target.classList.contains("range-slider-pointer")) {
-          var onPointerMove = function onPointerMove(e) {
-            var _this$model = _this.model,
-                step = _this$model.step,
-                min = _this$model.min,
-                max = _this$model.max;
-            var newLeft, stepDiv, thumbWidth, position;
+          currentPointer = e.target;
+        }
 
-            if (_this.model.vertical) {
-              newLeft = _this.view.slider[0].offsetHeight - e.clientY - shiftY + _this.view.slider[0].getBoundingClientRect().top;
-            } else {
-              newLeft = e.clientX - shiftX - _this.view.slider[0].getBoundingClientRect().left;
+        var onPointerMove = function onPointerMove(e) {
+          var sliderThumbX, sliderLen;
+
+          if (_this.model.vertical) {
+            sliderThumbX = _this.view.slider[0].offsetHeight - e.clientY + _this.view.slider[0].getBoundingClientRect().top;
+          } else {
+            sliderThumbX = e.clientX - _this.view.slider[0].getBoundingClientRect().left - _this.view.pointer[0].offsetWidth * 0.5;
+          }
+
+          var thumbPosition = pointerKeeper(sliderThumbX / _this.view.sliderEdge, 0, 1);
+
+          var nearestStep = _this.getNearestStep(thumbPosition);
+
+          var value = _this.getValue(nearestStep);
+
+          var position = _this.getPosition(nearestStep);
+
+          if (_this.model.interval) {
+            if (currentPointer === _this.pointers[0]) {
+              var rightEdge;
+
+              if (_this.model.vertical) {
+                rightEdge = parseInt(_this.pointers[1].style.bottom) - _this.pointers[1].offsetHeight;
+              } else {
+                rightEdge = parseInt(_this.pointers[1].style.left) - _this.pointers[1].offsetWidth;
+              }
+
+              _this.view.movePointer(currentPointer, pointerKeeper(position, 0, rightEdge), value);
             }
 
-            stepDiv = Math.round(max * newLeft / _this.view.sliderEdge / step);
-            thumbWidth = stepDiv * step;
-            position = thumbWidth / max * _this.view.sliderEdge;
+            if (currentPointer === _this.pointers[1]) {
+              var leftEdge;
 
-            if (_this.model.vertical) {
-              var progress = thumbWidth / max * 100;
-              _this.view.pointer[0].style.bottom = pointerKeeper(position) + 'px';
-              _this.view.sliderValue[0].style.bottom = pointerKeeper(position) + 'px';
-              _this.view.progressBar[0].style.height = pointerKeeper(progress, 0, 100) + '%';
-            } else {
-              var _progress = thumbWidth / max * 100;
+              if (_this.model.vertical) {
+                leftEdge = parseInt(_this.pointers[0].style.bottom) + _this.pointers[0].offsetHeight - 0.5;
+              } else {
+                leftEdge = parseInt(_this.pointers[0].style.left) + _this.pointers[0].offsetWidth - 0.5;
+              }
 
-              _this.view.pointer[0].style.left = pointerKeeper(position) + 'px';
-              _this.view.sliderValue[0].style.left = pointerKeeper(position) + 'px';
-              _this.view.progressBar[0].style.width = pointerKeeper(_progress, 0, 100) + '%';
-            } // решить проблему со сдвигом
+              _this.view.movePointer(currentPointer, pointerKeeper(position, leftEdge), value);
+            }
+          } else {
+            console.log(currentPointer, pointerKeeper(position), pointerKeeper(value, _this.model.min, _this.model.max));
 
+            _this.view.movePointer(currentPointer, pointerKeeper(position), pointerKeeper(value, _this.model.min, _this.model.max));
+          }
+        };
 
-            var pos = _this.view.pointer[0].getBoundingClientRect().left - _this.view.slider[0].getBoundingClientRect().left;
+        var onPointerUp = function onPointerUp() {
+          document.removeEventListener('pointermove', onPointerMove);
+          document.removeEventListener('pointerup', onPointerUp);
+        };
 
-            var sum = (max - min) / 100;
-            var test = Math.abs(min - max) * Math.round(position / _this.view.sliderEdge * 100) / 100 + min;
-            var value = (max - min) * Math.round(position / _this.view.sliderEdge * 100) / 100 + min;
-            value = test;
-            _this.view.sliderValue[0].innerText = pointerKeeper(value, _this.model.min, _this.model.max); // shiftX = shiftX*0.5
-            // let newPos = e.pageX - shiftX - this.view.slider[0].getBoundingClientRect().left
-            // let value = Math.round(Math.abs(this.model.max + this.model.min) *newPos/this.view.sliderEdge)
-            // this.view.thumbFrom[0].style.left = pointerKeeper( newPos) + 'px'
-            // this.view.sliderValue[0].style.left = pointerKeeper( newPos) + 'px'
-            // this.view.sliderValue[0].innerText = pointerKeeper(value, this.model.min, this.model.max)
-            // this.view.progressBar[0].style.width = pointerKeeper( newPos) + 'px'
-            // console.log(e.pageX - this.view.slider[0].getBoundingClientRect().left)
-          };
-
-          var onPointerUp = function onPointerUp() {
-            document.removeEventListener('pointermove', onPointerMove);
-            document.removeEventListener('pointerup', onPointerUp);
-          };
-
-          document.addEventListener('pointermove', onPointerMove);
-          document.addEventListener('pointerup', onPointerUp);
-        }
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
 
         var pointerKeeper = function pointerKeeper(pos) {
           var min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-          var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _this.view.sliderEdge + 1;
+          var max = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _this.view.sliderEdge;
 
           if (pos < min) {
             return min;
@@ -214,36 +270,7 @@ var Controller = /*#__PURE__*/function () {
 
           return pos;
         };
-      }; // defPosition = (shiftX, event)=>{
-      //     this.sliderEdge = this.view.slider.outerWidth() - this.view.thumbFrom.outerWidth()
-      //     let {step, min, max} = this.model.getOptions()
-      //     let newLeft = event.clientX - shiftX - this.view.slider[0].getBoundingClientRect().left
-      //     console.log(newLeft)
-      //     // let stepDiv = Math.round((max * newLeft / this.sliderEdge) / step)
-      //
-      //     // let thumbWidth = (stepDiv * step)
-      //     // return Math.round(thumbWidth / max * this.sliderEdge)
-      //     return newLeft
-      // }
-      //
-      // onPointerMove = (event) => {
-      //     event.preventDefault()
-      //     let position = this.defPosition( this.shiftX, event)
-      //     this.view.changeThumbPosition(position, this.view.thumbFrom)
-      // }
-      //
-      // handleMouseEvents = ()=>{
-      //     this.view.slider[0].onpointerdown = ((event)=>{
-      //          console.log(123)
-      //          this.shiftX = event.clientX - event.target.getBoundingClientRect().left
-      //          document.addEventListener('pointermove', this.onPointerMove);
-      //          this.onPointerMove(event)
-      //     })
-      //     document.addEventListener('pointerup', () => {
-      //         document.removeEventListener('pointermove', this.onPointerMove)
-      //     })
-      // }
-
+      };
     });
 
     this.model = model;
@@ -259,108 +286,107 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "changeColorPointer",
     value: function changeColorPointer(color) {
-      this.view.pointer[0].style.background = color;
+      this.view.pointer.css('background', color);
     }
   }, {
     key: "updateSlider",
     value: function updateSlider() {
       this.view.updateSlider();
-      console.log(this.model.vertical);
+      this.setDefaultValues();
       this.handlePointerEvent();
+      this.handleScaleClicks();
+      this.pointers = [this.view.pointer[0], this.view.pointer[1]];
     }
   }, {
     key: "renderView",
     value: function renderView() {
       this.view.renderSlider();
+      this.setDefaultValues();
       this.handlePointerEvent();
+      this.handleScaleClicks();
+      this.pointers = [this.view.pointer[0], this.view.pointer[1]];
+    }
+  }, {
+    key: "movePointer",
+    value: function movePointer(el, pos, value) {
+      this.view.movePointer(el, pos, value);
+    }
+  }, {
+    key: "getPercentage",
+    value: function getPercentage(pos) {
+      return pos / this.view.sliderEdge;
+    }
+  }, {
+    key: "getNearestStep",
+    value: function getNearestStep(pos) {
+      var minMaxLength = Math.abs(this.model.min - this.model.max);
+      var stepsCount = minMaxLength / this.model.step;
+      return Math.ceil(stepsCount * pos);
+    }
+  }, {
+    key: "getPosition",
+    value: function getPosition(nearestStep) {
+      var minMaxLength = Math.abs(this.model.min - this.model.max);
+      var stepsCount = minMaxLength / this.model.step;
+      return nearestStep / stepsCount * this.view.sliderEdge;
+    }
+  }, {
+    key: "getValue",
+    value: function getValue(nearestStep) {
+      console.log(nearestStep);
+      return nearestStep * this.model.step + this.model.min;
+    }
+  }, {
+    key: "convertPixelsToValue",
+    value: function convertPixelsToValue(px) {
+      var pxFraction = px / this.view.sliderEdge;
+      return Math.round(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min);
+    }
+  }, {
+    key: "convertValueToPixels",
+    value: function convertValueToPixels(val) {
+      if (typeof val !== 'number') {
+        val = parseInt(val);
+      }
+
+      var pos = val + this.model.min * -1;
+      return pos / Math.abs(this.model.min - this.model.max) * this.view.sliderEdge;
+    }
+  }, {
+    key: "setDefaultValues",
+    value: function setDefaultValues() {
+      var _this2 = this;
+
+      this.view.slider.ready(function () {
+        if (_this2.model.interval) {
+          _this2.movePointer(_this2.view.pointer[0], _this2.convertValueToPixels(_this2.model.from), _this2.model.from);
+
+          _this2.movePointer(_this2.view.pointer[1], _this2.convertValueToPixels(_this2.model.to), _this2.model.to);
+        } else {
+          _this2.movePointer(_this2.view.pointer[0], _this2.convertValueToPixels(_this2.model.from), _this2.model.from);
+        }
+      });
+    }
+  }, {
+    key: "handleScaleClicks",
+    value: function handleScaleClicks() {
+      var _this3 = this;
+
+      console.log(this.view.scaleValue);
+      $.each(this.view.scaleValue, function (i, value) {
+        value.addEventListener('pointerdown', function () {
+          var pos = _this3.convertValueToPixels(value.innerHTML);
+
+          console.log(pos);
+
+          _this3.movePointer(_this3.closetsPointer(pos), pos, value.innerHTML);
+        });
+      });
     }
   }]);
 
   return Controller;
-}(); // export function SliderController(model, view) {
-//     $('body').ready( () => {
-//         let {min, max} = model.getModel()
-//         const thumbFrom: HTMLElement = document.querySelector('.range-slider-thumb-lower')
-//         const thumbTo :HTMLElement = document.querySelector('.range-slider-thumb-upper')
-//
-//         const rangeSlider: HTMLElement = document.querySelector('.range-slider')!;
-//
-//         const progressInput: HTMLInputElement = document.querySelector('.colorBar')
-//         const progressThumb: HTMLInputElement = document.querySelector('.colorThumb')
-//         const stepInput: HTMLInputElement = document.querySelector('.step')
-//         const minInput: HTMLInputElement = document.querySelector('.min')
-//         const maxInput: HTMLInputElement = document.querySelector('.max')
-//         const fromInput: HTMLInputElement = document.querySelector('.from')
-//         let endSlider = rangeSlider.offsetWidth - thumbFrom.offsetWidth
-//
-//
-//         progressInput.addEventListener('input', () => {
-//             model.setColorBar(progressInput.value)
-//         })
-//         progressThumb.addEventListener('input', () => {
-//             model.setColorThumb(progressThumb.value)
-//         })
-//         stepInput.addEventListener('input', () => {
-//             model.setStep(+stepInput.value)
-//             fromInput.setAttribute("step", stepInput.value)
-//         })
-//         minInput.addEventListener('change', () => {
-//             model.setMin(+minInput.value)
-//             view.renderScale()
-//         })
-//         maxInput.addEventListener('change', () => {
-//             model.setMax(+maxInput.value)
-//             view.renderScale()
-//         })
-//         fromInput.addEventListener('input', () => {
-//             model.setFrom(+fromInput.value)
-//             let {from, min, max} = model.getModel()
-//             view.changeThumbPosition(view.convertValueToPx(from))
-//
-//         })
-//
-//         const defPosition = (shiftX, event)=>{
-//             let {step} = model.getModel()
-//             let newLeft = event.clientX - shiftX - rangeSlider.getBoundingClientRect().left
-//             let stepDiv = Math.round((max * newLeft / endSlider) / step)
-//             let thumbWidth = (stepDiv * step)
-//             return Math.round(thumbWidth / max * endSlider)
-//         }
-//
-//
-//         // thumbFrom.onpointerdown = (event) => {
-//         //     event.preventDefault()
-//         //     let shiftX = event.clientX - thumbFrom.getBoundingClientRect().left
-//         //     document.addEventListener('pointermove', onPointerMove);
-//         //     function onPointerMove(event) {
-//         //         let position = defPosition(shiftX,event)
-//         //         model.setFrom(position)
-//         //         view.changeThumbPosition(position, thumbFrom)
-//         //     }
-//         //     document.addEventListener('pointerup', () => {
-//         //         document.removeEventListener('pointermove', onPointerMove)
-//         //     })
-//         // }
-//
-//
-//         // thumbTo.onpointerdown = (event) => {
-//         //     event.preventDefault()
-//         //     let shiftX = event.clientX - thumbTo.getBoundingClientRect().left
-//         //     document.addEventListener('pointermove', onPointerMove);
-//         //     function onPointerMove(event) {
-//         //         let position = defPosition(shiftX,event)
-//         //         model.setTo(position)
-//         //         view.changeThumbPosition(position, thumbTo)
-//         //     }
-//         //     document.addEventListener('pointerup', () => {
-//         //         document.removeEventListener('pointermove', onPointerMove)
-//         //     })
-//         // }
-//     })
-//
-//
-// }
-
+}();
 
 
 
@@ -377,12 +403,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ SliderModel)
 /* harmony export */ });
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -397,7 +417,8 @@ var SliderModel = /*#__PURE__*/function () {
     this.step = options['step'];
     this.min = options['min'];
     this.max = options['max'];
-    this.values = options['values'];
+    this.from = options['from'];
+    this.to = options['to'];
     this.vertical = options['vertical'];
     this.colorBar = options['colorBar'];
     this.colorThumb = options['colorThumb'];
@@ -441,9 +462,19 @@ var SliderModel = /*#__PURE__*/function () {
       this.scale = value;
     }
   }, {
-    key: "setOptions",
-    value: function setOptions(options) {
-      this.options = _objectSpread(_objectSpread({}, this.options), options);
+    key: "setFrom",
+    value: function setFrom(from) {
+      this.from = from;
+    }
+  }, {
+    key: "setTo",
+    value: function setTo(to) {
+      this.to = to;
+    }
+  }, {
+    key: "setInterval",
+    value: function setInterval(interval) {
+      this.interval = interval;
     }
   }]);
 
@@ -466,8 +497,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ Observer),
 /* harmony export */   "MakeObserverSubject": () => (/* binding */ MakeObserverSubject)
 /* harmony export */ });
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Observer = function Observer(model, controller) {
@@ -480,14 +509,16 @@ var Observer = function Observer(model, controller) {
       switch (p) {
         case "step":
           target.setStep(value);
-          return;
+          return true;
 
         case "min":
-          target.setMin(value);
-          return;
+          target.setMin(parseInt(value));
+          controller.updateSlider();
+          return true;
 
         case "max":
-          target.setMax(value);
+          target.setMax(parseInt(value));
+          controller.updateSlider();
           return;
 
         case "colorBar":
@@ -513,8 +544,30 @@ var Observer = function Observer(model, controller) {
         case "scale":
           if (!target['scale'] === value) {
             target.setScale(value);
-            console.log(_typeof(target.scale), target.scale);
             controller.updateSlider();
+          }
+
+          return;
+
+        case "from":
+          var posFrom = controller.convertValueToPixels(value);
+          console.log(posFrom);
+          controller.movePointer(controller.view.pointer[0], posFrom, value);
+          target.setFrom(value);
+          return;
+
+        case "to":
+          var posTo = controller.convertValueToPixels(value);
+          console.log(posTo);
+          controller.movePointer(controller.view.pointer[1], posTo, value);
+          target.setFrom(value);
+          return;
+
+        case "interval":
+          if (!target['interval'] === value) {
+            target.setInterval(value);
+            controller.updateSlider();
+            return;
           }
 
       }
@@ -574,47 +627,59 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var View = /*#__PURE__*/function () {
   function View(model, root) {
     _classCallCheck(this, View);
-
-    _defineProperty(this, "viewState", {});
 
     this.model = model;
     this.root = root;
   }
 
   _createClass(View, [{
+    key: "convertValToPx",
+    value: function convertValToPx(val) {
+      return this.sliderEdge * (val / (this.model.max - this.model.min) * 100) / 100 - this.model.min;
+    }
+  }, {
+    key: "getPercentage",
+    value: function getPercentage(pos) {
+      return pos / this.sliderEdge * 100;
+    }
+  }, {
     key: "renderSlider",
     value: function renderSlider() {
       var _this = this;
 
       if (this.model.vertical) {
         this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(this.root);
+        this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider);
       } else {
         this.slider = $('<div class="range-slider"><div/>').appendTo(this.root);
+        this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider);
       }
 
       if (this.model.interval) {
-        console.log("is Interval SLIDER!!!");
+        this.pointer = $('<div class="range-slider-pointer"><div/>').add($('<div class="range-slider-pointer"><div/>')).css('background', this.model.colorThumb).appendTo(this.slider);
+        $.each(this.pointer, function (i, pointer) {
+          $('<div class="range-slider-value"><div/>').appendTo(pointer);
+        });
+        this.sliderValue = $('.range-slider-value');
       } else {
         this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider);
         this.pointer.css('background', this.model.colorThumb);
+        this.sliderValue = $('<div class="range-slider-value"><div/>').appendTo(this.pointer);
       }
 
-      this.sliderValue = $('<div class="range-slider-value"><div/>').appendTo(this.slider);
-      this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider);
       this.progressBar.css('background', this.model.colorBar);
 
       if (this.model.scale) {
         this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider);
         this.renderScale();
+        this.scaleValue = $('.scale-value');
       }
 
       this.slider.ready(function () {
-        if (_this.viewState["vertical"]) {
+        if (_this.model.vertical) {
           _this.sliderEdge = _this.slider[0].offsetHeight - _this.pointer[0].offsetHeight;
         } else {
           _this.sliderEdge = _this.slider[0].offsetWidth - _this.pointer[0].offsetWidth;
@@ -625,20 +690,21 @@ var View = /*#__PURE__*/function () {
     key: "renderScale",
     value: function renderScale() {
       var tmp = 0;
-      var scaleValue = $('<div class="scale-value"><div/>');
       var count = 4;
       var step = Math.abs(this.model.max - this.model.min) / count;
 
       if (this.model.vertical) {
         for (var i = this.model.max; i >= this.model.min; i -= step) {
+          console.log(i);
+          console.log(this.model.min, this.model.max);
           $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').css('top', tmp + "%");
           tmp += 25;
         }
       } else {
-        console.log(214);
-
         for (var _i = this.model.min; _i <= this.model.max; _i += step) {
-          $('<div class="scale-value"><div/>').appendTo(this.scale).html(_i).css('position', 'absolute').css('left', tmp + "%");
+          console.log(_i);
+          console.log(this.model.min, this.model.max);
+          $('<div class="scale-value"><div/>').appendTo(this.scale).html(Math.round(_i)).css('position', 'absolute').css('left', tmp + "%");
           tmp += 25;
         }
       }
@@ -654,83 +720,44 @@ var View = /*#__PURE__*/function () {
       this.removeSlider();
       this.renderSlider();
     }
+  }, {
+    key: "movePointer",
+    value: function movePointer(el, position, value) {
+      console.log(el, position, value);
+
+      if (this.model.vertical) {
+        el.style.bottom = position + 'px';
+        this.sliderValue[0].style.bottom = position + 'px';
+
+        if (this.model.interval) {
+          this.progressBar[0].style.bottom = this.pointer[0].style.bottom;
+          var lenOfInterval = parseInt(this.pointer[1].style.bottom) - parseInt(this.pointer[0].style.bottom);
+          this.progressBar[0].style.height = lenOfInterval / this.sliderEdge * 100 + "%";
+        } else {
+          el.style.bottom = position + 'px';
+          this.sliderValue[0].style.bottom = position + 'px';
+          this.progressBar[0].style.height = this.getPercentage(position) + '%';
+        }
+      } else {
+        el.style.left = position + 'px';
+
+        if (this.model.interval) {
+          this.progressBar[0].style.left = this.pointer[0].style.left;
+
+          var _lenOfInterval = parseInt(this.pointer[1].style.left) - parseInt(this.pointer[0].style.left);
+
+          this.progressBar[0].style.width = _lenOfInterval / this.sliderEdge * 100 + "%";
+        } else {
+          this.progressBar[0].style.width = position + 2 + 'px';
+        }
+      }
+
+      el.children[1].innerText = value;
+    }
   }]);
 
   return View;
-}(); // export function SliderView(model, container) {
-//     this.slider = $('<div class="range-slider"><div/>').appendTo(container)
-//     this.thumbFrom = $('<div class="range-slider-thumb-lower"><div/>').appendTo(this.slider)
-//     this.thumbTo = $('<div class="range-slider-thumb-upper"><div/>').appendTo(this.slider)
-//     let endSlider;
-//     this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider)
-//     this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider)
-//
-//     this.slider.ready(
-//         () => {
-//             endSlider = this.slider.outerWidth() - this.thumbFrom.outerWidth()
-//             for (let i = 0; i <= 20; i++) {
-//                 if (i === 0 || i % 5 === 0) {
-//                     this.scaleValue = $('<div class="range-slider-scale-item_text"><div/>').appendTo(this.scale)
-//                 } else {
-//                     this.scaleValue = $('<div class="range-slider-scale-item_small"><div/>').appendTo(this.scale)
-//                 }
-//             }
-//             let textValue: NodeListOf<HTMLElement> = document.querySelectorAll('.range-slider-scale-item_text')
-//             let counter = 0;
-//             this.renderScale = () => {
-//                 let {min, max} = model.getModel()
-//                 console.log()
-//
-//                 for (let value = min; value <= max; value++) {
-//                     if (value === min || (value / (Math.abs(min) + max)) * 100 % 25 === 0) {
-//                         textValue[counter].innerText = value
-//                         counter++
-//                     }
-//                 }
-//             }
-//             this.renderScale()
-//             this.subscribe = (func) => {
-//                 func(this)
-//             }
-//             this.changeThumbPosition = (px, el) => {
-//                 let {min, max} = model.getModel()
-//                 const rangeKeeper = (count: number, min: number = 0, max: number = endSlider) => {
-//                     if (count < min) {
-//                         return min
-//                     }
-//                     if (count > max) {
-//                         return max
-//                     }
-//                     return count
-//                 }
-//
-//                 let endSlider = this.slider.outerWidth() - this.thumbFrom.outerWidth()
-//                 let position = Math.round(rangeKeeper(px)) / endSlider * 100
-//                 el.style.left = position + '%'
-//
-//
-//                 // this.thumbFrom.css('left', position+ "%")
-//                 // this.thumbFrom.css('left', rangeKeeper(px) + "px")
-//
-//                 el.innerHtml = rangeKeeper(Math.round(min + (max - min) * (px / endSlider)), min, max)
-//                 let fromPos = this.thumbFrom[0].getBoundingClientRect().left - this.slider[0].getBoundingClientRect().left
-//                 let toPos = this.thumbTo[0].getBoundingClientRect().left - this.slider[0].getBoundingClientRect().left
-//
-//                 this.progressBar.css('width', (toPos - fromPos) / endSlider * 100 + "%")
-//                 this.progressBar.css('left', fromPos / endSlider * 100 + '%')
-//             }
-//             this.convertValueToPx = (value) => {
-//                 const {min, max} = model.getModel()
-//                 return value * endSlider / (min + max)
-//             }
-//
-//             this.changeThumbPosition(this.convertValueToPx(model.getModel().from), this.thumbFrom[0])
-//             this.changeThumbPosition(this.convertValueToPx(model.getModel().to), this.thumbTo[0])
-//
-//         }
-//     )
-// }
-
+}();
 
 
 
@@ -11713,9 +11740,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 (function ($) {
-  $.fn.rangeSlider = function () {
-    var slider = new _ts_App__WEBPACK_IMPORTED_MODULE_1__.default();
-    slider.init();
+  $.fn.rangeSlider = function (options) {
+    var slider = new _ts_App__WEBPACK_IMPORTED_MODULE_1__.default(options);
   };
 })(jQuery);
 
