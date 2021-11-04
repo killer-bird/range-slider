@@ -29,15 +29,15 @@ export default class View {
             this.pointer = $('<div class="range-slider-pointer"><div/>')
                 .add($('<div class="range-slider-pointer"><div/>'))
                 .css('background', this.model.colorThumb).appendTo(this.slider)
-            $.each(this.pointer, (i, pointer)=>{
-                $('<div class="range-slider-value"><div/>').appendTo(pointer)
-            })
+
             this.sliderValue = $('.range-slider-value')
         } else {
             this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider)
             this.pointer.css('background', this.model.colorThumb)
-            this.sliderValue = $('<div class="range-slider-value"><div/>').appendTo(this.pointer)
         }
+        $.each(this.pointer, (i, pointer)=>{
+            $('<div class="range-slider-value"><div/>').appendTo(pointer)
+        })
 
 
         this.progressBar.css('background', this.model.colorBar)
@@ -91,14 +91,12 @@ export default class View {
         console.log(el,position, value)
         if (this.model.vertical) {
             el.style.bottom = position + 'px';
-            this.sliderValue[0].style.bottom = position + 'px';
             if (this.model.interval) {
                 this.progressBar[0].style.bottom = this.pointer[0].style.bottom
                 let lenOfInterval = parseInt(this.pointer[1].style.bottom) - parseInt(this.pointer[0].style.bottom)
                 this.progressBar[0].style.height = lenOfInterval / this.sliderEdge * 100 + "%"
             } else {
                 el.style.bottom = position + 'px';
-                this.sliderValue[0].style.bottom = position + 'px';
                 this.progressBar[0].style.height = this.getPercentage(position) + '%'
             }
 
@@ -112,6 +110,7 @@ export default class View {
                 this.progressBar[0].style.width = position + 2 + 'px'
             }
         }
+        console.log(el.children)
         el.children[1].innerText = value
     }
 }

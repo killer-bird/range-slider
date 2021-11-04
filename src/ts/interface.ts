@@ -56,13 +56,13 @@ export default class Controller {
     }
 
     getValue(nearestStep) {
-        console.log(nearestStep)
         return nearestStep * this.model.step + this.model.min
     }
 
     convertPixelsToValue(px) {
-        const pxFraction = px / this.view.sliderEdge
-        return Math.round(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min)
+        const pxFraction = parseInt(px) / this.view.sliderEdge
+        console.log(this.view.sliderEdge, px)
+        return Math.ceil(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min)
     }
 
     convertValueToPixels(val: number) {
@@ -110,7 +110,6 @@ export default class Controller {
         $.each(this.view.scaleValue, (i, value) => {
             value.addEventListener('pointerdown', () => {
                 let pos = this.convertValueToPixels(value.innerHTML)
-                console.log(pos)
                 this.movePointer(this.closetsPointer(pos), pos, value.innerHTML)
             })
         })
@@ -124,7 +123,6 @@ export default class Controller {
             let minMaxLength = Math.abs(this.model.min - this.model.min)
             if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
                 let curr = (e.clientX - this.view.slider[0].getBoundingClientRect().left - this.view.pointer[0].offsetWidth * 0.5)
-                console.log(this.model.max - this.model.min, minMaxLength)
                 this.movePointer(this.closetsPointer(curr), curr, Math.round(Math.abs(this.model.min - this.model.max) * (curr / this.view.sliderEdge) + this.model.min))
             }
             if (e.target.classList.contains("range-slider_vertical") || e.target.classList.contains("range-slider-progress_vertical")) {
@@ -152,23 +150,29 @@ export default class Controller {
 
                 if (this.model.interval) {
                     if (currentPointer === this.pointers[0]) {
-                        let rightEdge
+                        let highEdge, valueHighEdge
                         if (this.model.vertical) {
-                            rightEdge = parseInt(this.pointers[1].style.bottom) - this.pointers[1].offsetHeight
+                            highEdge = parseInt(this.pointers[1].style.bottom) - this.pointers[1].offsetHeight
                         } else {
-                            rightEdge = parseInt(this.pointers[1].style.left) - this.pointers[1].offsetWidth
+                            highEdge = parseInt(this.pointers[1].style.left) - this.pointers[1].offsetWidth
                         }
-                        this.view.movePointer(currentPointer, pointerKeeper(position, 0, rightEdge), value)
+                        valueHighEdge = this.convertPixelsToValue(highEdge)
+                        value = pointerKeeper(value, this.model.min, valueHighEdge)
+                        position =  pointerKeeper(position, 0, highEdge)
+
                     }
                     if (currentPointer === this.pointers[1]) {
-                        let leftEdge
+                        let lowEdge, valueLowEdge
                         if (this.model.vertical) {
-                            leftEdge = parseInt(this.pointers[0].style.bottom) + this.pointers[0].offsetHeight - 0.5
+                            lowEdge = parseInt(this.pointers[0].style.bottom) + this.pointers[0].offsetHeight - 0.5
                         } else {
-                            leftEdge = parseInt(this.pointers[0].style.left) + this.pointers[0].offsetWidth - 0.5
+                            lowEdge = parseInt(this.pointers[0].style.left) + this.pointers[0].offsetWidth - 0.5
                         }
-                        this.view.movePointer(currentPointer, pointerKeeper(position, leftEdge), value)
+                        valueLowEdge = this.convertPixelsToValue(lowEdge)
+                        value = pointerKeeper(value, valueLowEdge)
+                        position = pointerKeeper(position, lowEdge)
                     }
+                    this.view.movePointer(currentPointer, position, value)
                 } else {
                     console.log(currentPointer, pointerKeeper(position), pointerKeeper(value, this.model.min, this.model.max))
                     this.view.movePointer(currentPointer, pointerKeeper(position), pointerKeeper(value, this.model.min, this.model.max))

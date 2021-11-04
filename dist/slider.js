@@ -124,11 +124,11 @@ var defaultSettings = {
   max: 200,
   from: 20,
   to: 60,
-  vertical: false,
+  vertical: true,
   colorBar: '#32a85c',
   colorThumb: '#5032a8',
   scale: true,
-  interval: true
+  interval: false
 };
 
 /***/ }),
@@ -185,7 +185,6 @@ var Controller = /*#__PURE__*/function () {
 
         if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
           var curr = e.clientX - _this.view.slider[0].getBoundingClientRect().left - _this.view.pointer[0].offsetWidth * 0.5;
-          console.log(_this.model.max - _this.model.min, minMaxLength);
 
           _this.movePointer(_this.closetsPointer(curr), curr, Math.round(Math.abs(_this.model.min - _this.model.max) * (curr / _this.view.sliderEdge) + _this.model.min));
         }
@@ -219,28 +218,34 @@ var Controller = /*#__PURE__*/function () {
 
           if (_this.model.interval) {
             if (currentPointer === _this.pointers[0]) {
-              var rightEdge;
+              var highEdge, valueHighEdge;
 
               if (_this.model.vertical) {
-                rightEdge = parseInt(_this.pointers[1].style.bottom) - _this.pointers[1].offsetHeight;
+                highEdge = parseInt(_this.pointers[1].style.bottom) - _this.pointers[1].offsetHeight;
               } else {
-                rightEdge = parseInt(_this.pointers[1].style.left) - _this.pointers[1].offsetWidth;
+                highEdge = parseInt(_this.pointers[1].style.left) - _this.pointers[1].offsetWidth;
               }
 
-              _this.view.movePointer(currentPointer, pointerKeeper(position, 0, rightEdge), value);
+              valueHighEdge = _this.convertPixelsToValue(highEdge);
+              value = pointerKeeper(value, _this.model.min, valueHighEdge);
+              position = pointerKeeper(position, 0, highEdge);
             }
 
             if (currentPointer === _this.pointers[1]) {
-              var leftEdge;
+              var lowEdge, valueLowEdge;
 
               if (_this.model.vertical) {
-                leftEdge = parseInt(_this.pointers[0].style.bottom) + _this.pointers[0].offsetHeight - 0.5;
+                lowEdge = parseInt(_this.pointers[0].style.bottom) + _this.pointers[0].offsetHeight - 0.5;
               } else {
-                leftEdge = parseInt(_this.pointers[0].style.left) + _this.pointers[0].offsetWidth - 0.5;
+                lowEdge = parseInt(_this.pointers[0].style.left) + _this.pointers[0].offsetWidth - 0.5;
               }
 
-              _this.view.movePointer(currentPointer, pointerKeeper(position, leftEdge), value);
+              valueLowEdge = _this.convertPixelsToValue(lowEdge);
+              value = pointerKeeper(value, valueLowEdge);
+              position = pointerKeeper(position, lowEdge);
             }
+
+            _this.view.movePointer(currentPointer, position, value);
           } else {
             console.log(currentPointer, pointerKeeper(position), pointerKeeper(value, _this.model.min, _this.model.max));
 
@@ -333,14 +338,14 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "getValue",
     value: function getValue(nearestStep) {
-      console.log(nearestStep);
       return nearestStep * this.model.step + this.model.min;
     }
   }, {
     key: "convertPixelsToValue",
     value: function convertPixelsToValue(px) {
-      var pxFraction = px / this.view.sliderEdge;
-      return Math.round(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min);
+      var pxFraction = parseInt(px) / this.view.sliderEdge;
+      console.log(this.view.sliderEdge, px);
+      return Math.ceil(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min);
     }
   }, {
     key: "convertValueToPixels",
@@ -376,8 +381,6 @@ var Controller = /*#__PURE__*/function () {
       $.each(this.view.scaleValue, function (i, value) {
         value.addEventListener('pointerdown', function () {
           var pos = _this3.convertValueToPixels(value.innerHTML);
-
-          console.log(pos);
 
           _this3.movePointer(_this3.closetsPointer(pos), pos, value.innerHTML);
         });
@@ -660,16 +663,15 @@ var View = /*#__PURE__*/function () {
 
       if (this.model.interval) {
         this.pointer = $('<div class="range-slider-pointer"><div/>').add($('<div class="range-slider-pointer"><div/>')).css('background', this.model.colorThumb).appendTo(this.slider);
-        $.each(this.pointer, function (i, pointer) {
-          $('<div class="range-slider-value"><div/>').appendTo(pointer);
-        });
         this.sliderValue = $('.range-slider-value');
       } else {
         this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider);
         this.pointer.css('background', this.model.colorThumb);
-        this.sliderValue = $('<div class="range-slider-value"><div/>').appendTo(this.pointer);
       }
 
+      $.each(this.pointer, function (i, pointer) {
+        $('<div class="range-slider-value"><div/>').appendTo(pointer);
+      });
       this.progressBar.css('background', this.model.colorBar);
 
       if (this.model.scale) {
@@ -727,7 +729,6 @@ var View = /*#__PURE__*/function () {
 
       if (this.model.vertical) {
         el.style.bottom = position + 'px';
-        this.sliderValue[0].style.bottom = position + 'px';
 
         if (this.model.interval) {
           this.progressBar[0].style.bottom = this.pointer[0].style.bottom;
@@ -735,7 +736,6 @@ var View = /*#__PURE__*/function () {
           this.progressBar[0].style.height = lenOfInterval / this.sliderEdge * 100 + "%";
         } else {
           el.style.bottom = position + 'px';
-          this.sliderValue[0].style.bottom = position + 'px';
           this.progressBar[0].style.height = this.getPercentage(position) + '%';
         }
       } else {
@@ -752,6 +752,7 @@ var View = /*#__PURE__*/function () {
         }
       }
 
+      console.log(el.children);
       el.children[1].innerText = value;
     }
   }]);
