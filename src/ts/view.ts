@@ -87,8 +87,8 @@ export default class View {
         this.renderSlider()
     }
 
-    movePointer(el, position: number, value:number) {
-        console.log(el,position, value)
+    movePointer(el, position: number, value) {
+        el.children[1].innerHTML = value
         if (this.model.vertical) {
             el.style.bottom = position + 'px';
             if (this.model.interval) {
@@ -110,7 +110,5 @@ export default class View {
                 this.progressBar[0].style.width = position + 2 + 'px'
             }
         }
-        console.log(el.children)
-        el.children[1].innerText = value
     }
 }

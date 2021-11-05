@@ -11,7 +11,9 @@ import App from "./ts/App";
 
 }(jQuery));
 
-$('div').rangeSlider( )
+$('div').rangeSlider()
+
+
 
 
 

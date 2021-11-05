@@ -6,7 +6,7 @@ export const defaultSettings: ModelOptions = {
     max: 200,
     from: 20,
     to: 60,
-    vertical: true,
+    vertical: false,
     colorBar: '#32a85c',
     colorThumb: '#5032a8',
     scale: true,

@@ -58,7 +58,6 @@ body {
       }
 
       .range-slider-scale {
-        margin: 5px 0;
         width: 95%;
         height: 30px;
         display: flex;
@@ -66,6 +65,9 @@ body {
         left: 6px;
 
         .scale-value {
+          color: #49596c;
+          font-family: monospace;
+          font-weight: bold;
           transform: translate(-50%, 50%);
           cursor: pointer;
           position: absolute;
@@ -75,7 +77,7 @@ body {
       &_vertical {
         height: 300px;
         width: 8px;
-        background: darkgray;
+        background: #a3c1f6;
         border-radius: 3px;
         position: relative;
 
@@ -106,11 +108,14 @@ body {
         .range-slider-scale {
           margin-right: 23px;
           width: 30px;
-          height: 92%;
+          height: 93%;
           position: absolute;
           left: 18px;
-          bottom: 32px;
+          bottom: 26px;
           .scale-value{
+            color: #49596c;
+            font-weight: bold;
+            font-family: monospace;
             transform: translate(0, 50%);
             cursor: pointer;
             position: absolute;
@@ -132,7 +137,6 @@ body {
           font-weight: bold;
           text-align: center;
         }
-
       }
 
     }
