@@ -1,1 +1,1 @@
-# range-slider [SLIDER](https://rommel977.github.io/range-slider/dist/index.html)
+# range-slider [DEMO](https://rommel977.github.io/range-slider/dist/index.html)
