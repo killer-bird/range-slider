@@ -42,12 +42,9 @@ module.exports = {
     ],
     module: {
         rules: [
+
             {
-                test: /\.css$/i,
-                use: [MiniCssExtractPlugin.loader, 'css-loader'],
-            },
-            {
-                test: /\.s[ac]ss$/i,
+                test: /\.s[ac]ss$/i,    
                 use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
             },
             {
@@ -75,6 +72,15 @@ module.exports = {
                     }
                 }
             },
+            {
+                test: /\.ts$/,
+                exclude: [ path.resolve(__dirname, "test") ],
+                enforce: 'post',
+                use: {
+                    loader: 'istanbul-instrumenter-loader',
+                    options: { esModules: true }
+                }
+            }
         ]
     }
 }

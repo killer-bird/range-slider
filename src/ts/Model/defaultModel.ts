@@ -1,4 +1,4 @@
-import {ModelOptions} from "./interfases";
+import {ModelOptions} from "../interfaces";
 
 export const defaultSettings: ModelOptions = {
     step: 1,
@@ -7,8 +7,7 @@ export const defaultSettings: ModelOptions = {
     from: 20,
     to: 60,
     vertical: false,
-    colorBar: '#32a85c',
-    colorThumb: '#5032a8',
+    color: '#32a85c',
     scale: true,
     interval: false
 }

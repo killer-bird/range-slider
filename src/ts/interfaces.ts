@@ -5,8 +5,7 @@ interface ModelOptions {
     from:number;
     to:number;
     vertical:boolean;
-    colorBar: string;
-    colorThumb:string;
+    color: string;
     scale: boolean;
     interval: boolean;
 }

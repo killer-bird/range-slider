@@ -1,17 +1,17 @@
 import './scss/index.scss'
-import App from "./ts/App";
+import '/src/ts/App.ts'
+
+$('.slider-container').rangeSlider({ min:5
+})
 
 
 
-(function ($) {
 
-    $.fn.rangeSlider = function (options?) {
-        const slider = new App(options)
-    }
 
-}(jQuery));
 
-$('div').rangeSlider()
+
+
+
 
 
 

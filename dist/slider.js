@@ -12,11 +12,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ App)
 /* harmony export */ });
-/* harmony import */ var _sliderModel__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./sliderModel */ "./src/ts/sliderModel.ts");
-/* harmony import */ var _defaultModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./defaultModel */ "./src/ts/defaultModel.ts");
-/* harmony import */ var _sliderObserver__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./sliderObserver */ "./src/ts/sliderObserver.ts");
-/* harmony import */ var _view__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./view */ "./src/ts/view.ts");
-/* harmony import */ var _interface__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./interface */ "./src/ts/interface.ts");
+/* harmony import */ var _Model_model__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Model/model */ "./src/ts/Model/model.ts");
+/* harmony import */ var _Model_defaultModel__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Model/defaultModel */ "./src/ts/Model/defaultModel.ts");
+/* harmony import */ var _Observer_sliderObserver__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Observer/sliderObserver */ "./src/ts/Observer/sliderObserver.ts");
+/* harmony import */ var _View_view__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./View/view */ "./src/ts/View/view.ts");
+/* harmony import */ var _Controller_controller__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Controller/controller */ "./src/ts/Controller/controller.ts");
 /* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
 
@@ -49,23 +49,21 @@ var toInput = document.querySelector('.to');
 var intervalInput = document.querySelector('.interval');
 
 var App = /*#__PURE__*/function () {
-  function App(options) {
+  function App(options, el) {
     _classCallCheck(this, App);
 
     this.options = options;
+    this.container = el;
     this.init();
   }
 
   _createClass(App, [{
     key: "init",
     value: function init() {
-      var model = new _sliderModel__WEBPACK_IMPORTED_MODULE_0__.default(_objectSpread(_objectSpread({}, _defaultModel__WEBPACK_IMPORTED_MODULE_1__.defaultSettings), this.options));
-      var container = document.createElement('div');
-      container.className = "slider-container";
-      document.body.append(container);
-      var newView = new _view__WEBPACK_IMPORTED_MODULE_3__.default(model, $('<div class="slider-container"><div/>').appendTo($("body")));
-      var controller = new _interface__WEBPACK_IMPORTED_MODULE_4__.default(model, newView);
-      var observer = new _sliderObserver__WEBPACK_IMPORTED_MODULE_2__.default(model, controller);
+      var model = new _Model_model__WEBPACK_IMPORTED_MODULE_0__.default(_objectSpread(_objectSpread({}, _Model_defaultModel__WEBPACK_IMPORTED_MODULE_1__.defaultSettings), this.options));
+      var newView = new _View_view__WEBPACK_IMPORTED_MODULE_3__.default(model, this.container.appendTo($("body")));
+      var controller = new _Controller_controller__WEBPACK_IMPORTED_MODULE_4__.default(model, newView);
+      var observer = new _Observer_sliderObserver__WEBPACK_IMPORTED_MODULE_2__.default(model, controller);
       progressInput.addEventListener('change', function () {
         observer.proxyModel.colorBar = progressInput.value;
       });
@@ -107,36 +105,10 @@ var App = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./src/ts/defaultModel.ts":
-/*!********************************!*\
-  !*** ./src/ts/defaultModel.ts ***!
-  \********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "defaultSettings": () => (/* binding */ defaultSettings)
-/* harmony export */ });
-var defaultSettings = {
-  step: 1,
-  min: -100,
-  max: 200,
-  from: 20,
-  to: 60,
-  vertical: true,
-  colorBar: '#32a85c',
-  colorThumb: '#5032a8',
-  scale: true,
-  interval: false
-};
-
-/***/ }),
-
-/***/ "./src/ts/interface.ts":
-/*!*****************************!*\
-  !*** ./src/ts/interface.ts ***!
-  \*****************************/
+/***/ "./src/ts/Controller/controller.ts":
+/*!*****************************************!*\
+  !*** ./src/ts/Controller/controller.ts ***!
+  \*****************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -163,13 +135,36 @@ var Controller = /*#__PURE__*/function () {
       return _this.pointers.reduce(function (previousValue, currentValue) {
         if (_this.model.vertical) {
           if (currentValue) {
-            return Math.abs(parseInt(currentValue.style.bottom) - curr) < Math.abs(parseInt(previousValue.style.bottom) - curr) ? currentValue : previousValue;
+            if (Math.abs(parseInt(currentValue.style.bottom) - curr) < Math.abs(parseInt(previousValue.style.bottom) - curr)) {
+              console.log(curr, _this.model.to);
+
+              _this.model.setTo(curr);
+
+              return currentValue;
+            } else {
+              _this.model.setFrom(curr);
+
+              console.log(curr, _this.model.from);
+              return previousValue;
+            }
           } else {
+            _this.model.setFrom(curr);
+
             return _this.pointers[0];
           }
         } else {
           if (currentValue) {
-            return Math.abs(parseInt(currentValue.style.left) - curr) < Math.abs(parseInt(previousValue.style.left) - curr) ? currentValue : previousValue;
+            if (Math.abs(parseInt(currentValue.style.left) - curr) < Math.abs(parseInt(previousValue.style.left) - curr)) {
+              _this.model.setTo(_this.convertPixelsToValue(curr));
+
+              console.log(curr, _this.model.to);
+              return currentValue;
+            } else {
+              _this.model.setFrom(_this.convertPixelsToValue(curr));
+
+              console.log(curr, _this.model.from);
+              return previousValue;
+            }
           } else {
             return _this.pointers[0];
           }
@@ -178,34 +173,35 @@ var Controller = /*#__PURE__*/function () {
     });
 
     _defineProperty(this, "handlePointerEvent", function () {
-      _this.view.slider[0].onpointerdown = function (e) {
+      _this.view.slider.onpointerdown = function (e) {
         e.preventDefault();
         var currentPointer = _this.view.pointer[0];
-        var minMaxLength = Math.abs(_this.model.min - _this.model.min);
 
-        if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
-          var curr = e.clientX - _this.view.slider[0].getBoundingClientRect().left - _this.view.pointer[0].offsetWidth * 0.5;
-
-          _this.movePointer(_this.closetsPointer(curr), curr, Math.round(Math.abs(_this.model.min - _this.model.max) * (curr / _this.view.sliderEdge) + _this.model.min));
-        }
-
-        if (e.target.classList.contains("range-slider_vertical") || e.target.classList.contains("range-slider-progress_vertical")) {
-          var _curr = _this.view.slider[0].getBoundingClientRect().bottom - e.clientY - _this.view.pointer[0].offsetWidth * 0.5;
-
-          _this.view.movePointer(_this.closetsPointer(_curr), _curr, _this.getPercentage(_curr));
-        }
-
-        if (e.target.classList.contains("range-slider-pointer")) {
+        if (e.target.classList.contains("slider-pointer")) {
           currentPointer = e.target;
+        } else {
+          var currPos;
+
+          if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
+            currPos = e.clientX - _this.view.slider.getBoundingClientRect().left - _this.view.pointer.offsetWidth * 0.5;
+
+            _this.movePointer(_this.closetsPointer(currPos), currPos, _this.convertPixelsToValue(currPos));
+          }
+
+          if (e.target.classList.contains("range-slider_vertical") || e.target.classList.contains("range-slider-progress_vertical")) {
+            currPos = _this.view.slider.getBoundingClientRect().bottom - e.clientY - _this.view.pointer.offsetWidth * 0.5;
+
+            _this.view.movePointer(_this.closetsPointer(currPos), currPos, _this.convertPixelsToValue(currPos));
+          }
         }
 
         var onPointerMove = function onPointerMove(e) {
           var sliderThumbX, sliderLen;
 
           if (_this.model.vertical) {
-            sliderThumbX = _this.view.slider[0].offsetHeight - e.clientY + _this.view.slider[0].getBoundingClientRect().top;
+            sliderThumbX = _this.view.slider.offsetHeight - e.clientY + _this.view.slider.getBoundingClientRect().top - _this.view.pointer.offsetWidth * 0.5;
           } else {
-            sliderThumbX = e.clientX - _this.view.slider[0].getBoundingClientRect().left - _this.view.pointer[0].offsetWidth * 0.5;
+            sliderThumbX = e.clientX - _this.view.slider.getBoundingClientRect().left;
           }
 
           var thumbPosition = pointerKeeper(sliderThumbX / _this.view.sliderEdge, 0, 1);
@@ -215,6 +211,8 @@ var Controller = /*#__PURE__*/function () {
           var value = _this.getValue(nearestStep);
 
           var position = _this.getPosition(nearestStep);
+
+          _this.model.setFrom(value);
 
           if (_this.model.interval) {
             if (currentPointer === _this.pointers[0]) {
@@ -228,6 +226,9 @@ var Controller = /*#__PURE__*/function () {
 
               valueHighEdge = _this.convertPixelsToValue(highEdge);
               value = pointerKeeper(value, _this.model.min, valueHighEdge);
+
+              _this.model.setFrom(value);
+
               position = pointerKeeper(position, 0, highEdge);
             }
 
@@ -242,13 +243,14 @@ var Controller = /*#__PURE__*/function () {
 
               valueLowEdge = _this.convertPixelsToValue(lowEdge);
               value = pointerKeeper(value, valueLowEdge);
+
+              _this.model.setTo(value);
+
               position = pointerKeeper(position, lowEdge);
             }
 
             _this.view.movePointer(currentPointer, position, value);
           } else {
-            console.log(currentPointer, pointerKeeper(position), pointerKeeper(value, _this.model.min, _this.model.max));
-
             _this.view.movePointer(currentPointer, pointerKeeper(position), pointerKeeper(value, _this.model.min, _this.model.max));
           }
         };
@@ -281,6 +283,7 @@ var Controller = /*#__PURE__*/function () {
     this.model = model;
     this.view = view;
     this.renderView();
+    console.log(this.view.sliderEdge);
   }
 
   _createClass(Controller, [{
@@ -344,7 +347,6 @@ var Controller = /*#__PURE__*/function () {
     key: "convertPixelsToValue",
     value: function convertPixelsToValue(px) {
       var pxFraction = parseInt(px) / this.view.sliderEdge;
-      console.log(this.view.sliderEdge, px);
       return Math.ceil(Math.abs(this.model.min - this.model.max) * pxFraction + this.model.min);
     }
   }, {
@@ -360,29 +362,44 @@ var Controller = /*#__PURE__*/function () {
   }, {
     key: "setDefaultValues",
     value: function setDefaultValues() {
-      var _this2 = this;
+      if (this.model.to < this.model.from) {
+        this.model.setTo(this.model.from);
+      }
 
-      this.view.slider.ready(function () {
-        if (_this2.model.interval) {
-          _this2.movePointer(_this2.view.pointer[0], _this2.convertValueToPixels(_this2.model.from), _this2.model.from);
+      if (this.model.from < this.model.min) {
+        this.model.setFrom(this.model.min);
+      }
 
-          _this2.movePointer(_this2.view.pointer[1], _this2.convertValueToPixels(_this2.model.to), _this2.model.to);
-        } else {
-          _this2.movePointer(_this2.view.pointer[0], _this2.convertValueToPixels(_this2.model.from), _this2.model.from);
-        }
-      });
+      if (this.model.to < this.model.min) {
+        this.model.setTo(this.model.min);
+      }
+
+      if (this.model.from > this.model.max) {
+        this.model.setFrom(this.model.max);
+      }
+
+      if (this.model.to > this.model.max) {
+        this.model.setTo(this.model.max);
+      }
+
+      if (this.model.interval) {
+        this.movePointer(this.view.pointer[0], this.convertValueToPixels(this.model.from), this.model.from);
+        this.movePointer(this.view.pointer[1], this.convertValueToPixels(this.model.to), this.model.to);
+      } else {
+        this.movePointer(this.view.pointer, this.convertValueToPixels(this.model.from), this.model.from);
+      }
     }
   }, {
     key: "handleScaleClicks",
     value: function handleScaleClicks() {
-      var _this3 = this;
+      var _this2 = this;
 
       console.log(this.view.scaleValue);
       $.each(this.view.scaleValue, function (i, value) {
         value.addEventListener('pointerdown', function () {
-          var pos = _this3.convertValueToPixels(value.innerHTML);
+          var pos = _this2.convertValueToPixels(value.innerHTML);
 
-          _this3.movePointer(_this3.closetsPointer(pos), pos, value.innerHTML);
+          _this2.movePointer(_this2.closetsPointer(pos), pos, value.innerHTML);
         });
       });
     }
@@ -395,16 +412,42 @@ var Controller = /*#__PURE__*/function () {
 
 /***/ }),
 
-/***/ "./src/ts/sliderModel.ts":
+/***/ "./src/ts/Model/defaultModel.ts":
+/*!**************************************!*\
+  !*** ./src/ts/Model/defaultModel.ts ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "defaultSettings": () => (/* binding */ defaultSettings)
+/* harmony export */ });
+var defaultSettings = {
+  step: 1,
+  min: -100,
+  max: 200,
+  from: 20,
+  to: 60,
+  vertical: false,
+  colorBar: '#32a85c',
+  colorThumb: '#5032a8',
+  scale: true,
+  interval: false
+};
+
+/***/ }),
+
+/***/ "./src/ts/Model/model.ts":
 /*!*******************************!*\
-  !*** ./src/ts/sliderModel.ts ***!
+  !*** ./src/ts/Model/model.ts ***!
   \*******************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ SliderModel)
+/* harmony export */   "default": () => (/* binding */ Model)
 /* harmony export */ });
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -412,9 +455,9 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var SliderModel = /*#__PURE__*/function () {
-  function SliderModel(options) {
-    _classCallCheck(this, SliderModel);
+var Model = /*#__PURE__*/function () {
+  function Model(options) {
+    _classCallCheck(this, Model);
 
     this.options = options;
     this.step = options['step'];
@@ -429,7 +472,7 @@ var SliderModel = /*#__PURE__*/function () {
     this.interval = options['interval'];
   }
 
-  _createClass(SliderModel, [{
+  _createClass(Model, [{
     key: "setStep",
     value: function setStep(step) {
       this.step = step;
@@ -481,17 +524,17 @@ var SliderModel = /*#__PURE__*/function () {
     }
   }]);
 
-  return SliderModel;
+  return Model;
 }();
 
 
 
 /***/ }),
 
-/***/ "./src/ts/sliderObserver.ts":
-/*!**********************************!*\
-  !*** ./src/ts/sliderObserver.ts ***!
-  \**********************************/
+/***/ "./src/ts/Observer/sliderObserver.ts":
+/*!*******************************************!*\
+  !*** ./src/ts/Observer/sliderObserver.ts ***!
+  \*******************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -612,10 +655,10 @@ function MakeObserverSubject() {
 
 /***/ }),
 
-/***/ "./src/ts/view.ts":
-/*!************************!*\
-  !*** ./src/ts/view.ts ***!
-  \************************/
+/***/ "./src/ts/View/view.ts":
+/*!*****************************!*\
+  !*** ./src/ts/View/view.ts ***!
+  \*****************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -623,98 +666,175 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ View)
 /* harmony export */ });
-/* provided dependency */ var $ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var View = /*#__PURE__*/function () {
   function View(model, root) {
+    var _this = this;
+
     _classCallCheck(this, View);
 
+    _defineProperty(this, "renderSlider", function () {
+      var createPointer = function createPointer(parent) {
+        var pointer = '<div class="slider-pointer"></div>';
+        var label = '<div class="slider-label"></div>';
+
+        if (_this.model.interval) {
+          for (var i = 0; i < 2; i++) {
+            parent.insertAdjacentHTML('beforeend', pointer);
+          }
+
+          _this.pointer = parent.querySelectorAll('.slider-pointer');
+
+          _this.pointer.forEach(function (i) {
+            i.insertAdjacentHTML('beforeend', label);
+          });
+        } else {
+          parent.insertAdjacentHTML('beforeend', pointer);
+          _this.pointer = _this.slider.querySelector('.slider-pointer');
+
+          _this.pointer.insertAdjacentHTML('beforeend', label);
+
+          if (_this.model.vertical) {
+            _this.pointer.style.right = -8 + 'px';
+          }
+        } // document.addEventListener('readystatechange', ()=>{
+        //     this.sliderEdge = this.slider.offsetWidth - this.pointer.offsetWidth
+        //     console.log(this.sliderEdge, this)
+        // })
+
+      };
+
+      _this.root.insertAdjacentHTML('beforeend', '<div class="slider"></div>');
+
+      _this.slider = _this.root.querySelector('.slider');
+      createPointer(_this.slider);
+
+      _this.slider.insertAdjacentHTML('beforeend', '<div class="range-slider-progress"></div>');
+
+      _this.progressBar = _this.slider.querySelector('.range-slider-progress');
+
+      if (_this.model.vertical) {
+        _this.slider.style.height = 300 + 'px';
+        _this.slider.style.width = 8 + 'px';
+        _this.progressBar.style.height = 0;
+        _this.progressBar.style.width = 100 + '%';
+        _this.sliderEdge = _this.slider.offsetHeight - _this.slider.firstChild.offsetHeight;
+      } else {
+        _this.slider.style.width = 300 + "px";
+        _this.slider.style.height = 8 + "px";
+        _this.progressBar.style.width = 0;
+        _this.progressBar.style.height = 100 + "%";
+      }
+
+      _this.renderScale();
+
+      _this.sliderEdge = _this.slider.offsetWidth;
+    });
+
     this.model = model;
-    this.root = root;
+    this.root = root[0];
   }
 
   _createClass(View, [{
-    key: "convertValToPx",
-    value: function convertValToPx(val) {
-      return this.sliderEdge * (val / (this.model.max - this.model.min) * 100) / 100 - this.model.min;
-    }
-  }, {
     key: "getPercentage",
     value: function getPercentage(pos) {
       return pos / this.sliderEdge * 100;
     }
   }, {
-    key: "renderSlider",
-    value: function renderSlider() {
-      var _this = this;
-
-      if (this.model.vertical) {
-        this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(this.root);
-        this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider);
-      } else {
-        this.slider = $('<div class="range-slider"><div/>').appendTo(this.root);
-        this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider);
-      }
-
-      if (this.model.interval) {
-        this.pointer = $('<div class="range-slider-pointer"><div/>').add($('<div class="range-slider-pointer"><div/>')).css('background', this.model.colorThumb).appendTo(this.slider);
-        this.sliderValue = $('.range-slider-value');
-      } else {
-        this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider);
-        this.pointer.css('background', this.model.colorThumb);
-      }
-
-      $.each(this.pointer, function (i, pointer) {
-        $('<div class="range-slider-value"><div/>').appendTo(pointer);
-      });
-      this.progressBar.css('background', this.model.colorBar);
-
-      if (this.model.scale) {
-        this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider);
-        this.renderScale();
-        this.scaleValue = $('.scale-value');
-      }
-
-      this.slider.ready(function () {
-        if (_this.model.vertical) {
-          _this.sliderEdge = _this.slider[0].offsetHeight - _this.pointer[0].offsetHeight;
-        } else {
-          _this.sliderEdge = _this.slider[0].offsetWidth - _this.pointer[0].offsetWidth;
-        }
-      });
-    }
-  }, {
     key: "renderScale",
     value: function renderScale() {
-      var tmp = 0;
-      var count = 4;
-      var step = Math.abs(this.model.max - this.model.min) / count;
+      if (this.model.scale) {
+        var tmp = 0;
+        this.slider.insertAdjacentHTML('beforeend', '<div class="slider-scale"></div>');
+        this.scale = this.slider.querySelector('.slider-scale');
+        var step = Math.abs(this.model.max - this.model.min) / 4;
 
-      if (this.model.vertical) {
-        for (var i = this.model.max; i >= this.model.min; i -= step) {
-          console.log(i);
-          console.log(this.model.min, this.model.max);
-          $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').css('top', tmp + "%");
-          tmp += 25;
-        }
-      } else {
-        for (var _i = this.model.min; _i <= this.model.max; _i += step) {
-          console.log(_i);
-          console.log(this.model.min, this.model.max);
-          $('<div class="scale-value"><div/>').appendTo(this.scale).html(Math.round(_i)).css('position', 'absolute').css('left', tmp + "%");
+        for (var i = this.model.min; i <= this.model.max; i += step) {
+          this.scale.insertAdjacentHTML('beforeend', "<div class=\"scale-value\" style=\"left: ".concat(tmp, "%\">").concat(i, "</div>"));
           tmp += 25;
         }
       }
-    }
+    } // renderSlider() {
+    //     console.log(this.root[0])
+    //
+    //     if(!this.root.hasClass("slider-container")){
+    //         console.log(1234)
+    //         this.root = null
+    //     }
+    //
+    //     if (this.model.vertical) {
+    //         this.slider = $('<div class="range-slider_vertical"><div/>').appendTo(this.root)
+    //         this.progressBar = $('<div class="range-slider-progress_vertical"><div/>').appendTo(this.slider)
+    //     } else {
+    //         this.slider = $('<div class="range-slider"><div/>').appendTo(this.root)
+    //         this.progressBar = $('<div class="range-slider-progress"><div/>').appendTo(this.slider)
+    //     }
+    //     if (this.model.interval) {
+    //         this.pointer = $('<div class="range-slider-pointer"><div/>')
+    //             .add($('<div class="range-slider-pointer"><div/>'))
+    //             .css('background', this.model.colorThumb).appendTo(this.slider)
+    //
+    //         this.sliderValue = $('.range-slider-label')
+    //     } else {
+    //         this.pointer = $('<div class="range-slider-pointer"><div/>').appendTo(this.slider)
+    //         this.pointer.css('background', this.model.colorThumb)
+    //     }
+    //     $.each(this.pointer, (i, pointer)=>{
+    //         $('<div class="range-slider-label"><div/>').appendTo(pointer)
+    //     })
+    //
+    //
+    //     this.progressBar.css('background', this.model.colorBar)
+    //     if (this.model.scale) {
+    //         this.scale = $('<div class="range-slider-scale"><div/>').appendTo(this.slider)
+    //
+    //         this.scaleValue = $('.scale-value')
+    //     }
+    //
+    //     this.slider.ready(() => {
+    //         if (this.model.vertical) {
+    //             this.sliderEdge = this.slider[0].offsetHeight - this.pointer[0].offsetHeight
+    //         } else {
+    //             this.sliderEdge = this.slider[0].offsetWidth - this.pointer[0].offsetWidth
+    //         }
+    //         this.renderScale()
+    //     })
+    //
+    // }
+    // renderScale() {
+    //     let tmp = 0;
+    //     let count = 4;
+    //     let step = Math.abs(this.model.max - this.model.min) / count
+    //     console.log(step)
+    //
+    //     if (this.model.vertical) {
+    //         for (let i = this.model.max; i >= this.model.min; i -= step) {
+    //             console.log(i)
+    //             console.log(this.model.min, this.model.max)
+    //             $('<div class="scale-value"><div/>').appendTo(this.scale).html(i).css('position', 'absolute').css('top', tmp + "%")
+    //             tmp += 25;
+    //         }
+    //     } else {
+    //         for (let i = this.model.min; i <= this.model.max; i += step) {
+    //             console.log(i)
+    //             console.log(this.model.min, this.model.max)
+    //             $('<div class="scale-value"><div/>').appendTo(this.scale).css('position', 'absolute').css('left', tmp + "%").html(Math.round(i))
+    //             tmp += 25;
+    //         }
+    //     }
+    // }
+
   }, {
     key: "removeSlider",
     value: function removeSlider() {
-      this.slider[0].remove();
+      this.slider.remove();
     }
   }, {
     key: "updateSlider",
@@ -725,35 +845,32 @@ var View = /*#__PURE__*/function () {
   }, {
     key: "movePointer",
     value: function movePointer(el, position, value) {
-      console.log(el, position, value);
+      el.firstChild.innerHTML = value;
 
       if (this.model.vertical) {
         el.style.bottom = position + 'px';
 
         if (this.model.interval) {
-          this.progressBar[0].style.bottom = this.pointer[0].style.bottom;
+          this.progressBar.style.bottom = this.pointer[0].style.bottom;
           var lenOfInterval = parseInt(this.pointer[1].style.bottom) - parseInt(this.pointer[0].style.bottom);
-          this.progressBar[0].style.height = lenOfInterval / this.sliderEdge * 100 + "%";
+          this.progressBar.style.height = lenOfInterval / this.sliderEdge * 100 + "%";
         } else {
           el.style.bottom = position + 'px';
-          this.progressBar[0].style.height = this.getPercentage(position) + '%';
+          this.progressBar.style.height = this.getPercentage(position) + '%';
         }
       } else {
         el.style.left = position + 'px';
 
         if (this.model.interval) {
-          this.progressBar[0].style.left = this.pointer[0].style.left;
+          this.progressBar.style.left = this.pointer[0].style.left;
 
           var _lenOfInterval = parseInt(this.pointer[1].style.left) - parseInt(this.pointer[0].style.left);
 
-          this.progressBar[0].style.width = _lenOfInterval / this.sliderEdge * 100 + "%";
+          this.progressBar.style.width = _lenOfInterval + "px";
         } else {
-          this.progressBar[0].style.width = position + 2 + 'px';
+          this.progressBar.style.width = position / this.sliderEdge * 100 + '%';
         }
       }
-
-      console.log(el.children);
-      el.children[1].innerText = value;
     }
   }]);
 
@@ -11742,10 +11859,19 @@ __webpack_require__.r(__webpack_exports__);
 
 (function ($) {
   $.fn.rangeSlider = function (options) {
-    var slider = new _ts_App__WEBPACK_IMPORTED_MODULE_1__.default(options);
+    var _this = this;
+
+    if (!$(this)[0].classList.contains('slider-container')) {
+      return new Error('241');
+    }
+
+    return this.each(function () {
+      new _ts_App__WEBPACK_IMPORTED_MODULE_1__.default(options, $(_this));
+    });
   };
 })(jQuery);
 
+$('.slider-container').rangeSlider();
 $('div').rangeSlider();
 })();
 

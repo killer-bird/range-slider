@@ -6,34 +6,26 @@ body {
   padding: 10%;
   background: beige;
 }
-body .slider-container {
-  margin: 50px 0 0 0;
-  width: fit-content;
-  height: fit-content;
-  padding: 0 5px;
-  position: relative;
-}
-body .slider-container .range-slider {
-  height: 8px;
-  width: 300px;
+body .slider {
+  margin: 50px;
   display: block;
   background: #a3c1f6;
   border-radius: 3px;
   position: relative;
 }
-body .slider-container .range-slider .range-slider-pointer {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+body .slider .slider-pointer {
+  transform: translate(-50%);
   z-index: 3;
   display: block;
   position: absolute;
   height: 23px;
   width: 23px;
   border-radius: 50%;
-  background: inherit;
+  background: blue;
   bottom: -7px;
   cursor: pointer;
 }
-body .slider-container .range-slider .range-slider-progress {
+body .slider .range-slider-progress {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   position: relative;
   height: 100%;
@@ -41,7 +33,9 @@ body .slider-container .range-slider .range-slider-progress {
   border-radius: 3px;
   background: blue;
 }
-body .slider-container .range-slider .range-slider-value {
+body .slider .slider-label {
+  left: 50%;
+  transform: translate(-50%);
   bottom: 27px;
   padding: 3px;
   display: inline-block;
@@ -56,27 +50,29 @@ body .slider-container .range-slider .range-slider-value {
   font-weight: bold;
   text-align: center;
 }
-body .slider-container .range-slider .range-slider-scale {
-  margin: 5px 0;
-  width: 95%;
+body .slider .slider-scale {
+  width: 102%;
   height: 30px;
   display: flex;
   position: absolute;
-  left: 6px;
+  left: -4px;
 }
-body .slider-container .range-slider .range-slider-scale .scale-value {
+body .slider .slider-scale .scale-value {
+  color: #49596c;
+  font-family: monospace;
+  font-weight: bold;
   transform: translate(-50%, 50%);
   cursor: pointer;
   position: absolute;
 }
-body .slider-container .range-slider_vertical {
+body .slider_vertical {
   height: 300px;
   width: 8px;
-  background: darkgray;
+  background: #a3c1f6;
   border-radius: 3px;
   position: relative;
 }
-body .slider-container .range-slider_vertical .range-slider-progress_vertical {
+body .slider_vertical .range-slider-progress_vertical {
   position: absolute;
   justify-content: flex-end;
   height: 0;
@@ -86,34 +82,38 @@ body .slider-container .range-slider_vertical .range-slider-progress_vertical {
   transform: rotate(180deg);
   bottom: 0;
 }
-body .slider-container .range-slider_vertical .range-slider-pointer {
+body .slider_vertical .range-slider-pointer {
   z-index: 10;
   position: absolute;
   height: 25px;
   width: 25px;
   border-radius: 50%;
-  background: red;
+  background: w;
   bottom: 0;
   right: -8px;
   cursor: pointer;
 }
-body .slider-container .range-slider_vertical .range-slider-scale {
+body .slider_vertical .range-slider-scale {
   margin-right: 23px;
   width: 30px;
-  height: 92%;
+  height: 93%;
   position: absolute;
   left: 18px;
-  bottom: 32px;
+  bottom: 26px;
 }
-body .slider-container .range-slider_vertical .range-slider-scale .scale-value {
+body .slider_vertical .range-slider-scale .scale-value {
+  color: #49596c;
+  font-weight: bold;
+  font-family: monospace;
   transform: translate(0, 50%);
   cursor: pointer;
   position: absolute;
 }
-body .slider-container .range-slider_vertical .range-slider-value {
+body .slider_vertical .range-slider-label {
   right: 29px;
   height: 16px;
   padding: 3px;
+  width: max-content;
   display: inline-block;
   min-width: 25px;
   line-height: 13px;

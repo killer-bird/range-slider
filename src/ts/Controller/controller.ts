@@ -1,14 +1,21 @@
+import Model from "../Model/model";
+import View from "../View/view";
+
+
 export default class Controller {
     public model
     public view
-    public sliderEdge: number
+
     public slider
     public pointers
 
-    constructor(model, view) {
-        this.model = model
-        this.view = view
+    constructor(root, options) {
+        console.log(options, root)
+        this.model = new Model(options)
+        this.view = new View(root, this.model)
         this.renderView()
+        this.handlePointerEvent()
+        this.setDefaultValues()
     }
 
     changeColorBar(color) {
@@ -68,36 +75,34 @@ export default class Controller {
         if (typeof val !== 'number') {
             val = parseInt(val)
         }
-        let pos = val + (this.model.min * -1)
-        return pos / Math.abs(this.model.min - this.model.max) * this.view.sliderEdge
+        let pos = val + (this.model.options.min * -1)
+        return pos / Math.abs(this.model.options.min - this.model.options.max) * this.view.sliderEdge
     }
 
     closetsPointer = (curr) => {
         return this.pointers.reduce((previousValue, currentValue) => {
-            if (this.model.vertical) {
+            if (this.model.options.vertical) {
                 if (currentValue) {
                     if (Math.abs(parseInt(currentValue.style.bottom) - curr) < Math.abs(parseInt(previousValue.style.bottom) - curr)){
                         console.log(curr, this.model.to)
-                        this.model.setTo(curr)
+                        // this.model.setTo(curr)
                         return currentValue
                     }else {
-                        this.model.setFrom(curr)
-                        console.log(curr, this.model.from)
+                        // this.model.setFrom(curr)
                        return  previousValue
                     }
                 } else {
-                    this.model.setFrom(curr)
+                    // this.model.setOptions({from: curr})
                     return this.pointers[0]
                 }
             } else {
                 if (currentValue) {
                     if (Math.abs(parseInt(currentValue.style.left) - curr) < Math.abs(parseInt(previousValue.style.left) - curr)){
-                        this.model.setTo(this.convertPixelsToValue(curr))
-                        console.log(curr, this.model.to)
+                        // this.model.setTo(this.convertPixelsToValue(curr))
                         return currentValue
                     }else {
-                        this.model.setFrom(this.convertPixelsToValue(curr))
-                        console.log(curr, this.model.from)
+                        // this.model.setFrom(this.convertPixelsToValue(curr))
+
                         return  previousValue
                     }
                 } else {
@@ -108,43 +113,39 @@ export default class Controller {
     }
 
     setDefaultValues() {
-        this.view.slider.ready(() => {
-            if (this.model.interval) {
-                this.movePointer(this.view.pointer[0], this.convertValueToPixels(this.model.from), this.model.from)
-                this.movePointer(this.view.pointer[1], this.convertValueToPixels(this.model.to), this.model.to)
-            } else {
-                this.movePointer(this.view.pointer[0], this.convertValueToPixels(this.model.from), this.model.from)
-            }
-        })
-
+        if (this.model.interval) {
+            this.movePointer(this.view.pointer[0], this.convertValueToPixels(this.model.from), this.model.from)
+            this.movePointer(this.view.pointer[1], this.convertValueToPixels(this.model.to), this.model.to)
+        } else {
+            this.movePointer(this.view.pointer, this.convertValueToPixels(this.model.options.from), this.model.options.from)
+        }
     }
 
     handleScaleClicks() {
-        console.log(this.view.scaleValue)
         $.each(this.view.scaleValue, (i, value) => {
             value.addEventListener('pointerdown', () => {
                 let pos = this.convertValueToPixels(value.innerHTML)
                 this.movePointer(this.closetsPointer(pos), pos, value.innerHTML)
             })
         })
-
     }
 
     handlePointerEvent = () => {
-        this.view.slider[0].onpointerdown = (e) => {
+        this.view.slider.onpointerdown = (e) => {
             e.preventDefault()
+
             let currentPointer = this.view.pointer[0];
-            if (e.target.classList.contains("range-slider-pointer")) {
+            if (e.target.classList.contains("slider-pointer")) {
                 currentPointer = e.target
 
             } else {
                 let currPos
                 if (e.target.classList.contains("range-slider") || e.target.classList.contains("range-slider-progress")) {
-                    currPos = (e.clientX - this.view.slider[0].getBoundingClientRect().left - this.view.pointer[0].offsetWidth * 0.5)
+                    currPos = (e.clientX - this.view.slider.getBoundingClientRect().left - this.view.pointer.offsetWidth * 0.5)
                     this.movePointer(this.closetsPointer(currPos), currPos, this.convertPixelsToValue(currPos))
                 }
                 if (e.target.classList.contains("range-slider_vertical") || e.target.classList.contains("range-slider-progress_vertical")) {
-                    currPos = (this.view.slider[0].getBoundingClientRect().bottom - e.clientY - this.view.pointer[0].offsetWidth * 0.5)
+                    currPos = (this.view.slider.getBoundingClientRect().bottom - e.clientY - this.view.pointer.offsetWidth * 0.5)
                     this.view.movePointer(this.closetsPointer(currPos), currPos, this.convertPixelsToValue(currPos))
                 }
             }
@@ -154,10 +155,10 @@ export default class Controller {
                 let sliderThumbX, sliderLen
 
                 if (this.model.vertical) {
-                    sliderThumbX = this.view.slider[0].offsetHeight - e.clientY + this.view.slider[0].getBoundingClientRect().top - this.view.pointer[0].offsetWidth * 0.5
+                    sliderThumbX = this.view.slider.offsetHeight - e.clientY + this.view.slider.getBoundingClientRect().top - this.view.pointer.offsetWidth * 0.5
 
                 } else {
-                    sliderThumbX = e.clientX - this.view.slider[0].getBoundingClientRect().left - this.view.pointer[0].offsetWidth * 0.5
+                    sliderThumbX = e.clientX - this.view.slider.getBoundingClientRect().left
                 }
                 let thumbPosition = pointerKeeper(sliderThumbX / this.view.sliderEdge, 0, 1)
                 let nearestStep = this.getNearestStep(thumbPosition)
@@ -167,6 +168,7 @@ export default class Controller {
 
                 if (this.model.interval) {
                     if (currentPointer === this.pointers[0]) {
+
                         let highEdge, valueHighEdge
                         if (this.model.vertical) {
                             highEdge = parseInt(this.pointers[1].style.bottom) - this.pointers[1].offsetHeight
@@ -179,6 +181,7 @@ export default class Controller {
                         position = pointerKeeper(position, 0, highEdge)
                     }
                     if (currentPointer === this.pointers[1]) {
+
                         let lowEdge, valueLowEdge
                         if (this.model.vertical) {
                             lowEdge = parseInt(this.pointers[0].style.bottom) + this.pointers[0].offsetHeight - 0.5
